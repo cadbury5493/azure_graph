@@ -1,0 +1,17 @@
+Dear Prabhu and Jamie,
+
+Thank you for sharing the compliance reports. Upon review, I have the following observations and requests for clarification:
+
+CIS Benchmark Version
+The compliance report for Windows Server 2022 appears to reference CIS Benchmark version v3.0.0. According to AWS documentation, Inspector currently uses CIS Benchmark version v2.0.0. This difference results in additional controls appearing in your report compared to the Inspector2 outputs.
+
+Could you please provide a compliance report for Windows Server 2022 based on CIS Benchmark version v2.0.0 for alignment with Inspector2 data?
+
+Exceptions Data
+The columns in the provided report related to exceptions are currently blank.
+
+Could you confirm whether this indicates that no exceptions have been applied?
+
+If exceptions do exist, please share the list of CIS controls for which exceptions have been granted.
+
+Your assistance in clarifying these points will help ensure our compliance tracking remains accurate and aligned with AWS Inspector standards.
