@@ -61,6 +61,10 @@ for file in os.listdir(input_folder):
     # Save JSON per region
     output_filename = f"{environment}_{region}_not_evaluated.json"
     output_path = os.path.join(input_folder, output_filename)
+
+
+for f in nonprod_*.csv; do mv "$f" "dev_${f#nonprod_}"; done; for f in nonprod2_*.csv; do mv "$f" "uat_${f#nonprod2_}"; done
+
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2)
 
