@@ -7,3 +7,46 @@ In the intake request for RHEL8, I had requested a baseline version for 3.0.0 �
 I’ve validated that the Amazon Linux 2 and Amazon Linux 3 IDs are matching; however, I noticed that the waiver data is missing in the Excel file. Could you please share the waiver data for these platforms for the AWSCENTRAL business unit?
 
 Thanks,
+
+
+Subject: Waivers Data Findings for CRDPM and AWSCentral
+
+Hi Prabhu,
+
+Please find my findings on the deviations data provided for the below business units:
+
+1. CRDPM
+
+We are looking for waivers data for Amazon Linux 2023 and Windows Server 2022.
+
+Filters applied: Business Unit = CRD, Business Unit 2 = AWS.
+
+With these filters:
+
+Only Amazon Linux 2023 appears in the Technology Component column. Windows Server 2022 is missing.
+
+For Amazon Linux 2023, the Control Reference column is empty.
+
+👉 Could you please provide the data for Amazon Linux 2023 and Windows Server 2022 with CIS Benchmark v2.0.0 or v3.0.0?
+
+2. AWSCentral
+
+We are looking for waivers data for Amazon Linux 2, Amazon Linux 2023, and RHEL 8.
+
+Filters applied: Business Unit = CORP, Business Unit 2 = AWS.
+
+With these filters:
+
+All three platforms appear in the Technology Component column.
+
+However, none of them specify which CIS benchmark version was used to provide waivers.
+
+Control Reference column:
+
+Has data for Amazon Linux 2 and Amazon Linux 2023.
+
+Is empty for RHEL 8.
+
+👉 Could you please confirm which CIS Benchmark version (v2.0.0 or v3.0.0) was used for these waivers and also provide the missing Control Reference data for RHEL 8?
+
+Thanks,
