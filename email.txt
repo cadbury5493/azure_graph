@@ -1,7 +1,7 @@
-AWS Inspector skips manual controls because they can’t be evaluated programmatically; they require human review and are usually addressed via governance/compliance workflows instead.
+AWS Inspector is marking CIS 5.2.4.6 as skipped even though it’s “automated” in docs because:
 
-Manual controls are things that cannot be reliably checked by an automated tool (e.g., “Verify IAM policies are reviewed quarterly” or “Ensure encryption keys are rotated as per policy”).
+Prereqs missing – SSM Agent, Inspector plugin, or IAM role not set up right.
 
-These controls require human judgment, process validation, or organizational context that Inspector cannot infer from AWS APIs.
+Platform mismatch – Control not actually implemented for Amazon Linux 2023 / your architecture.
 
-Since Inspector’s scope is automated compliance validation, it intentionally skips those manual checks rather than marking them as failures or successes.
+Network issue – Instance can’t reach required AWS endpoints to run the check.
