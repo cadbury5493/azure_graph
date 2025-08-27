@@ -1,7 +1,21 @@
-AWS Inspector is marking CIS 5.2.4.6 as skipped even though it’s “automated” in docs because:
+The following tables provide a detailed analysis of the Amazon Linux 2023 CIS profile.
 
-Prereqs missing – SSM Agent, Inspector plugin, or IAM role not set up right.
+Rows marked in green indicate controls where CIS profile versions align with Amazon Inspector.
 
-Platform mismatch – Control not actually implemented for Amazon Linux 2023 / your architecture.
+The Description column includes excerpts from the CIS benchmark, JSON output from the Amazon Inspector report, and relevant snippets from the CIS InSpec code repository.
 
-Network issue – Instance can’t reach required AWS endpoints to run the check.
+Issues Identified
+
+CIS ID Format Mismatch
+
+GCS generates CIS IDs with alphabet suffixes (e.g., 4.1.9b, 4.1.9c), which do not directly map to Amazon Inspector reports.
+
+Inspector reports instead use a simplified format (e.g., 4.1.9).
+
+Exception Handling
+
+GCS exceptions reference alphabet-suffixed controls (e.g., 4.1.9b, 4.1.9c).
+
+Amazon Inspector only provides the aggregated control (4.1.9).
+
+This creates ambiguity in applying exceptions, since Inspector does not distinguish sub-controls individually.
