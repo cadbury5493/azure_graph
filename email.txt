@@ -1,8 +1,7 @@
-Below are the exception CIS IDs provided by GCS with baseline v3.0.0.
-The table compares these exceptions against AWS Inspector, which currently uses v2.0.0 baselines for scanning.
+AWS Inspector skips manual controls because they can’t be evaluated programmatically; they require human review and are usually addressed via governance/compliance workflows instead.
 
-✅ Green → CIS IDs and descriptions match directly between v3.0.0 (GCS) and v2.0.0 (Inspector).
+Manual controls are things that cannot be reliably checked by an automated tool (e.g., “Verify IAM policies are reviewed quarterly” or “Ensure encryption keys are rotated as per policy”).
 
-🔴 Red → CIS IDs differ, but the same control with an equivalent description exists in Inspector.
+These controls require human judgment, process validation, or organizational context that Inspector cannot infer from AWS APIs.
 
-❌ NA → Neither the CIS ID nor the description is available in Inspector.
+Since Inspector’s scope is automated compliance validation, it intentionally skips those manual checks rather than marking them as failures or successes.
