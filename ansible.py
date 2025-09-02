@@ -312,3 +312,67 @@ payload["credentials"] = list(all_creds.keys())
 print("🔑 Credentials merged:")
 print(json.dumps(list(all_creds.values()), indent=2))
 
+
+-----
+
+# 4️⃣ Launch the job with these params
+launch_url = f"{TOWER_HOST}/api/v2/job_templates/{job_template_id}/launch/"
+response = requests.post(launch_url, headers=HEADERS, data=json.dumps(payload), verify=False)
+response.raise_for_status()
+
+job = response.json()
+job_id = job["id"]
+job_type = job["type"]   # "job" or "workflow_job"
+print(f"🚀 Launched {job_type}! ID: {job_id}")
+
+if job_type == "job":
+    # 🔎 Poll normal job status
+    job_url = f"{TOWER_HOST}/api/v2/jobs/{job_id}/"
+    while True:
+        job_resp = requests.get(job_url, headers=HEADERS, verify=False)
+        job_resp.raise_for_status()
+        job_data = job_resp.json()
+        status = job_data["status"]
+        print(f"Job {job_id} status: {status}")
+
+        if status in ["successful", "failed", "error", "canceled"]:
+            break
+        time.sleep(5)
+
+    if status == "successful":
+        print(f"🎉 Job {job_id} completed successfully")
+    else:
+        print(f"⚠️ Job {job_id} ended with status: {status}")
+
+elif job_type == "workflow_job":
+    # 🔎 Poll workflow job
+    wf_url = f"{TOWER_HOST}/api/v2/workflow_jobs/{job_id}/"
+    while True:
+        wf_resp = requests.get(wf_url, headers=HEADERS, verify=False)
+        wf_resp.raise_for_status()
+        wf_data = wf_resp.json()
+        wf_status = wf_data["status"]
+        print(f"Workflow {job_id} status: {wf_status}")
+
+        if wf_status in ["successful", "failed", "error", "canceled"]:
+            break
+        time.sleep(5)
+
+    # 🔎 After workflow completes, list child jobs
+    wf_nodes_url = f"{TOWER_HOST}/api/v2/workflow_jobs/{job_id}/workflow_nodes/"
+    nodes_resp = requests.get(wf_nodes_url, headers=HEADERS, verify=False)
+    nodes_resp.raise_for_status()
+    nodes = nodes_resp.json().get("results", [])
+
+    print(f"📂 Workflow {job_id} spawned {len(nodes)} nodes")
+    for node in nodes:
+        node_job = node.get("summary_fields", {}).get("job", {})
+        if node_job:
+            print(f" - Child Job ID {node_job['id']} ({node_job['status']})")
+
+    if wf_status == "successful":
+        print(f"🎉 Workflow {job_id} completed successfully")
+    else:
+        print(f"⚠️ Workflow {job_id} ended with status: {wf_status}")
+
+
