@@ -286,3 +286,29 @@ if credentials:
 print("📦 Launch payload ready:")
 print(json.dumps(payload, indent=2))
 
+
+----
+
+# Template credentials
+tmpl_cred_url = f"{TOWER_HOST}/api/v2/job_templates/{job_template_id}/credentials/"
+tmpl_cred_resp = requests.get(tmpl_cred_url, headers=HEADERS, verify=False)
+tmpl_cred_resp.raise_for_status()
+tmpl_creds = tmpl_cred_resp.json().get("results", [])
+
+# Schedule credentials
+sched_cred_url = f"{TOWER_HOST}/api/v2/schedules/{schedule_id}/credentials/"
+sched_cred_resp = requests.get(sched_cred_url, headers=HEADERS, verify=False)
+sched_cred_resp.raise_for_status()
+sched_creds = sched_cred_resp.json().get("results", [])
+
+# Merge + dedupe
+all_creds = {c["id"]: {"id": c["id"], "name": c["name"], "kind": c.get("kind")}
+             for c in (tmpl_creds + sched_creds)}
+
+# For payload
+payload["credentials"] = list(all_creds.keys())
+
+# For debugging
+print("🔑 Credentials merged:")
+print(json.dumps(list(all_creds.values()), indent=2))
+
