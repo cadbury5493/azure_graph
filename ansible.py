@@ -252,3 +252,37 @@ if "scm_branch" in params:
 
 print("📦 Launch payload ready:", json.dumps(payload, indent=2))
 
+----
+
+# Extra vars
+if "extra_data" in schedule_detail and schedule_detail["extra_data"]:
+    payload["extra_vars"] = schedule_detail["extra_data"]
+
+# SCM branch
+if "scm_branch" in schedule_detail and schedule_detail["scm_branch"]:
+    payload["scm_branch"] = schedule_detail["scm_branch"]
+
+# Job tags
+if "job_tags" in schedule_detail and schedule_detail["job_tags"]:
+    payload["job_tags"] = schedule_detail["job_tags"]
+
+# Limit
+if "limit" in schedule_detail and schedule_detail["limit"]:
+    payload["limit"] = schedule_detail["limit"]
+
+# Inventory (from summary_fields)
+inventory = schedule_detail.get("summary_fields", {}).get("inventory")
+if inventory and "id" in inventory:
+    payload["inventory"] = inventory["id"]
+
+# 3️⃣ Get credentials from /credentials API
+cred_url = f"{TOWER_HOST}/api/v2/schedules/{SCHEDULE_ID}/credentials/"
+cred_resp = requests.get(cred_url, headers=HEADERS, verify=False)
+cred_resp.raise_for_status()
+credentials = cred_resp.json().get("results", [])
+if credentials:
+    payload["credentials"] = [c["id"] for c in credentials]
+
+print("📦 Launch payload ready:")
+print(json.dumps(payload, indent=2))
+
