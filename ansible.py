@@ -112,10 +112,17 @@ HEADERS = {
     "Authorization": f"Bearer {BEARER_TOKEN}"
 }
 
-# 1️⃣ Extract business unit from commit message
-match = re.match(r"feat:\s+\S+\s+(\S+)", COMMIT_MESSAGE)
+
+
+COMMIT_MESSAGE = "feat: TO3065-17663 [crditeng] some message"
+
+match = re.search(r"\[(.*?)\]", COMMIT_MESSAGE)
 if not match:
     raise Exception(f"Could not parse business unit from commit message: {COMMIT_MESSAGE}")
+
+business_unit = match.group(1).lower()
+print(f"✅ Extracted business unit: {business_unit}")
+
 
 business_unit = match.group(1).lower()
 print(f"✅ Extracted business unit: {business_unit}")
