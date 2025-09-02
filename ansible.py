@@ -218,3 +218,37 @@ if status == "successful":
     print(f"🎉 Job {job_id} completed successfully")
 else:
     print(f"⚠️ Job {job_id} ended with status: {status}")
+
+
+----
+
+import requests
+import json
+
+schedule_id = 123  # matched schedule ID
+url = f"{TOWER_HOST}/api/v2/schedules/{schedule_id}/prompt/"
+
+resp = requests.post(url, headers=HEADERS, verify=False)
+resp.raise_for_status()
+
+params = resp.json()
+print(json.dumps(params, indent=2))
+
+# Build launch payload
+payload = {}
+
+if "extra_vars" in params:
+    payload["extra_vars"] = params["extra_vars"]
+if "inventory" in params:
+    payload["inventory"] = params["inventory"]["id"] if isinstance(params["inventory"], dict) else params["inventory"]
+if "credentials" in params:
+    payload["credentials"] = [c["id"] for c in params["credentials"]]
+if "job_tags" in params:
+    payload["job_tags"] = params["job_tags"]
+if "limit" in params:
+    payload["limit"] = params["limit"]
+if "scm_branch" in params:
+    payload["scm_branch"] = params["scm_branch"]
+
+print("📦 Launch payload ready:", json.dumps(payload, indent=2))
+
