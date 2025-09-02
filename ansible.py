@@ -87,3 +87,110 @@ if status == "successful":
     print(f"Job {job_id} completed successfully")
 else:
     print(f"Job {job_id} ended with status: {status}")
+
+----
+
+
+import requests
+import json
+import time
+import re
+
+# Tower/AWX details
+TOWER_HOST = "https://your-tower-host"
+BEARER_TOKEN = "your-api-token"
+
+# Job template name (as shown in Tower UI)
+JOB_TEMPLATE_NAME = "Install Nginx"
+
+# Example commit message (this will usually come dynamically)
+COMMIT_MESSAGE = "feat: TO3065-17663 crditeng some message"
+
+# API headers with bearer token
+HEADERS = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {BEARER_TOKEN}"
+}
+
+# 1️⃣ Extract business unit from commit message
+match = re.match(r"feat:\s+\S+\s+(\S+)", COMMIT_MESSAGE)
+if not match:
+    raise Exception(f"Could not parse business unit from commit message: {COMMIT_MESSAGE}")
+
+business_unit = match.group(1).lower()
+print(f"✅ Extracted business unit: {business_unit}")
+
+# 2️⃣ Get job template ID dynamically by name
+search_url = f"{TOWER_HOST}/api/v2/job_templates/?name={JOB_TEMPLATE_NAME}"
+resp = requests.get(search_url, headers=HEADERS, verify=False)
+
+if resp.status_code != 200:
+    raise Exception(f"Failed to search job template: {resp.status_code} {resp.text}")
+
+results = resp.json().get("results", [])
+if not results:
+    raise Exception(f"No job template found with name: {JOB_TEMPLATE_NAME}")
+
+job_template_id = results[0]["id"]
+print(f"✅ Found job template '{JOB_TEMPLATE_NAME}' with ID {job_template_id}")
+
+# 3️⃣ Get all schedules for this job template
+url = f"{TOWER_HOST}/api/v2/job_templates/{job_template_id}/schedules/"
+resp = requests.get(url, headers=HEADERS, verify=False)
+
+if resp.status_code != 200:
+    raise Exception(f"Failed to fetch schedules: {resp.status_code} {resp.text}")
+
+schedules = resp.json().get("results", [])
+
+if not schedules:
+    raise Exception(f"No schedules found for job template {job_template_id}")
+
+print(f"✅ Found {len(schedules)} schedules for job template {job_template_id}")
+
+# 4️⃣ Check if any schedule matches business unit
+matched_schedule = None
+for sched in schedules:
+    if business_unit in sched["name"].replace(" ", "").lower():
+        matched_schedule = sched
+        break
+
+if not matched_schedule:
+    raise Exception(f"No schedule found matching business unit '{business_unit}'")
+
+print(f"✅ Found matching schedule: {matched_schedule['name']} (ID: {matched_schedule['id']})")
+
+# 5️⃣ Launch the schedule
+launch_url = f"{TOWER_HOST}/api/v2/schedules/{matched_schedule['id']}/launch/"
+response = requests.post(launch_url, headers=HEADERS, verify=False)
+
+if response.status_code != 201:
+    raise Exception(f"Failed to launch schedule: {response.status_code} {response.text}")
+
+job = response.json()
+job_id = job["id"]
+print(f"🚀 Schedule launched job! Job ID: {job_id}")
+
+# 6️⃣ Poll job status
+job_url = f"{TOWER_HOST}/api/v2/jobs/{job_id}/"
+
+while True:
+    job_resp = requests.get(job_url, headers=HEADERS, verify=False)
+    if job_resp.status_code != 200:
+        raise Exception(f"Failed to get job status: {job_resp.status_code} {job_resp.text}")
+
+    job_data = job_resp.json()
+    status = job_data["status"]
+    print(f"Job {job_id} status: {status}")
+
+    if status in ["successful", "failed", "error", "canceled"]:
+        break
+
+    time.sleep(5)
+
+# 7️⃣ Final result
+if status == "successful":
+    print(f"🎉 Job {job_id} completed successfully")
+else:
+    print(f"⚠️ Job {job_id} ended with status: {status}")
+
