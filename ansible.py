@@ -167,30 +167,27 @@ if not matched_schedule:
 
 print(f"✅ Found matching schedule: {matched_schedule['name']} (ID: {matched_schedule['id']})")
 
-# 5️⃣ Extract launch parameters from schedule
-extra_vars = matched_schedule.get("extra_data", {})
-inventory_id = matched_schedule.get("inventory")
-scm_branch = matched_schedule.get("scm_branch")
-job_tags = matched_schedule.get("job_tags")
+# 3️⃣ Get launch parameters from schedule
+schedule_id = matched_schedule["id"]
+schedule_detail_url = f"{TOWER_HOST}/api/v2/schedules/{schedule_id}/"
+resp = requests.get(schedule_detail_url, headers=HEADERS, verify=False)
+resp.raise_for_status()
 
-payload = {
-    "extra_vars": extra_vars
-}
-if inventory_id:
-    payload["inventory"] = inventory_id
-if scm_branch:
-    payload["scm_branch"] = scm_branch
-if job_tags:
-    payload["job_tags"] = job_tags
+schedule_detail = resp.json()
 
-print(f"📦 Launch payload prepared: {json.dumps(payload, indent=2)}")
+# Extract launch params (only include if present)
+payload = {}
+for field in ["extra_data", "inventory", "scm_branch", "job_tags", "limit"]:
+    if field in schedule_detail and schedule_detail[field]:
+        # Tower expects "extra_data" as "extra_vars" when launching
+        if field == "extra_data":
+            payload["extra_vars"] = schedule_detail[field]
+        else:
+            payload[field] = schedule_detail[field]
 
-# 6️⃣ Get underlying job template ID from schedule
-unified_job_template = matched_schedule["unified_job_template"]
-job_template_id = unified_job_template.split("/")[-2]  # extract ID
-print(f"✅ Schedule is tied to job template ID: {job_template_id}")
+print(f"📦 Launch payload built: {json.dumps(payload, indent=2)}")
 
-# 7️⃣ Launch the job template with schedule's parameters
+# 4️⃣ Launch the job with these params
 launch_url = f"{TOWER_HOST}/api/v2/job_templates/{job_template_id}/launch/"
 response = requests.post(launch_url, headers=HEADERS, data=json.dumps(payload), verify=False)
 
@@ -199,11 +196,10 @@ if response.status_code != 201:
 
 job = response.json()
 job_id = job["id"]
-print(f"🚀 Job launched from schedule! Job ID: {job_id}")
+print(f"🚀 Job launched! ID: {job_id}")
 
-# 8️⃣ Poll job status
+# 5️⃣ Poll job status
 job_url = f"{TOWER_HOST}/api/v2/jobs/{job_id}/"
-
 while True:
     job_resp = requests.get(job_url, headers=HEADERS, verify=False)
     job_resp.raise_for_status()
@@ -217,9 +213,8 @@ while True:
 
     time.sleep(5)
 
-# 9️⃣ Final result
+# 6️⃣ Final result
 if status == "successful":
     print(f"🎉 Job {job_id} completed successfully")
 else:
     print(f"⚠️ Job {job_id} ended with status: {status}")
-
