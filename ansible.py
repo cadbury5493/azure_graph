@@ -167,24 +167,46 @@ if not matched_schedule:
 
 print(f"✅ Found matching schedule: {matched_schedule['name']} (ID: {matched_schedule['id']})")
 
-# 5️⃣ Launch the schedule
-launch_url = f"{TOWER_HOST}/api/v2/schedules/{matched_schedule['id']}/launch/"
-response = requests.post(launch_url, headers=HEADERS, verify=False)
+# 5️⃣ Extract launch parameters from schedule
+extra_vars = matched_schedule.get("extra_data", {})
+inventory_id = matched_schedule.get("inventory")
+scm_branch = matched_schedule.get("scm_branch")
+job_tags = matched_schedule.get("job_tags")
+
+payload = {
+    "extra_vars": extra_vars
+}
+if inventory_id:
+    payload["inventory"] = inventory_id
+if scm_branch:
+    payload["scm_branch"] = scm_branch
+if job_tags:
+    payload["job_tags"] = job_tags
+
+print(f"📦 Launch payload prepared: {json.dumps(payload, indent=2)}")
+
+# 6️⃣ Get underlying job template ID from schedule
+unified_job_template = matched_schedule["unified_job_template"]
+job_template_id = unified_job_template.split("/")[-2]  # extract ID
+print(f"✅ Schedule is tied to job template ID: {job_template_id}")
+
+# 7️⃣ Launch the job template with schedule's parameters
+launch_url = f"{TOWER_HOST}/api/v2/job_templates/{job_template_id}/launch/"
+response = requests.post(launch_url, headers=HEADERS, data=json.dumps(payload), verify=False)
 
 if response.status_code != 201:
-    raise Exception(f"Failed to launch schedule: {response.status_code} {response.text}")
+    raise Exception(f"Failed to launch job: {response.status_code} {response.text}")
 
 job = response.json()
 job_id = job["id"]
-print(f"🚀 Schedule launched job! Job ID: {job_id}")
+print(f"🚀 Job launched from schedule! Job ID: {job_id}")
 
-# 6️⃣ Poll job status
+# 8️⃣ Poll job status
 job_url = f"{TOWER_HOST}/api/v2/jobs/{job_id}/"
 
 while True:
     job_resp = requests.get(job_url, headers=HEADERS, verify=False)
-    if job_resp.status_code != 200:
-        raise Exception(f"Failed to get job status: {job_resp.status_code} {job_resp.text}")
+    job_resp.raise_for_status()
 
     job_data = job_resp.json()
     status = job_data["status"]
@@ -195,7 +217,7 @@ while True:
 
     time.sleep(5)
 
-# 7️⃣ Final result
+# 9️⃣ Final result
 if status == "successful":
     print(f"🎉 Job {job_id} completed successfully")
 else:
