@@ -1,9 +1,55 @@
-We have a couple of use cases where additional capabilities in AWS Inspector would greatly help our workflow:
+Hi,
 
-Granular Control-Level Reporting
-Currently, if any test under a CIS control fails, the entire control is marked as failed. For example, in control 4.1.9, if there are five individual tests and only two pass while three fail, the whole control is shown as failed.
-It would be very helpful if Inspector could generate reports at a more granular level—similar to Qualys—where the results are shown as 4.1.9a, 4.1.9b (passing) and the remaining sub-tests as failing. This would allow us to align with how GCS provides waivers at the sub-control level.
+I am in the process of applying waivers for the AWSCentral Business Unit, which includes the following three platforms:
 
-Freezing the CIS Baseline
-Inspector always picks up the latest CIS benchmark versions as soon as they are released. While this ensures up-to-date checks, it creates challenges because GCS cannot issue waivers immediately for all new controls introduced in a new version.
-If there were an option to freeze or lock Inspector to a specific CIS benchmark version, it would give us more stability and allow time to manage waivers for new controls in a planned manner.
+Amazon Linux 2
+
+Amazon Linux 2023
+
+RHEL 8
+
+Filters Applied:
+
+To isolate the relevant waivers, I applied the following filters:
+
+Business Unit: Selected CORP
+
+Business Unit 2: Selected Blank and AWS
+
+Technology Component: Selected Amazon Linux 2, Amazon Linux 2023, and RHEL8
+
+Observations and Clarifications Needed:
+RHEL 8:
+
+Rows 40–102:
+These entries list RHEL 8, but there is no mention of the CIS benchmark version the waivers apply to.
+
+Rows 444–469:
+These also pertain to RHEL 8, but again, no CIS benchmark version is specified, and the Control ID is missing as well.
+
+Rows 1596–1619:
+These entries are for RHEL 8 and clearly specify the CIS Benchmark version (3.0.0) along with the Control References.
+✅ These seem to have all the required details.
+
+Question:
+Can I consider only the waivers in rows 1596–1619 as valid and complete for RHEL 8? Please clarify whether the earlier rows (40–102 and 444–469) are usable or should be disregarded due to incomplete information.
+
+Amazon Linux 2:
+
+Rows 123–135:
+These entries do not mention which CIS benchmark version the waivers correspond to.
+
+Rows 658–678:
+These waivers are for Amazon Linux 2, but for version 1.0.0.
+We require waivers for version 3.0.0.
+➤ Please confirm if waivers for Amazon Linux 2 - CIS 3.0.0 are available.
+
+Amazon Linux 2023:
+
+The entries for Amazon Linux 2023 do not specify a CIS Benchmark version.
+However, since CIS has released only one version (1.0.0) for this platform, I am assuming the waivers provided are for CIS 1.0.0.
+➤ Please confirm if this assumption is correct.
+
+Let me know if you need any more information or clarification from my side.
+
+Best regards,
