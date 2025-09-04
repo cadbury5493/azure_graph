@@ -1,9 +1,9 @@
-Rajesh and I had a discussion regarding the recent updates. Please find the summary below:
+We have a couple of use cases where additional capabilities in AWS Inspector would greatly help our workflow:
 
-Rajesh confirmed that he has analyzed the data shared last week. The issue appears to be resolved, as many instances have been deleted from the production environment.
+Granular Control-Level Reporting
+Currently, if any test under a CIS control fails, the entire control is marked as failed. For example, in control 4.1.9, if there are five individual tests and only two pass while three fail, the whole control is shown as failed.
+It would be very helpful if Inspector could generate reports at a more granular level—similar to Qualys—where the results are shown as 4.1.9a, 4.1.9b (passing) and the remaining sub-tests as failing. This would allow us to align with how GCS provides waivers at the sub-control level.
 
-The reduction in VM count is primarily due to the deletion of a large number of instances.
-
-I will share the latest scan reports once they are generated tomorrow. Rajesh will review the data and share his analysis accordingly.
-
-Most of the instances with a CIS ID of 1 seem to belong to the UAT environment. Rajesh will verify this using the latest scan data and provide an updated analysis.
+Freezing the CIS Baseline
+Inspector always picks up the latest CIS benchmark versions as soon as they are released. While this ensures up-to-date checks, it creates challenges because GCS cannot issue waivers immediately for all new controls introduced in a new version.
+If there were an option to freeze or lock Inspector to a specific CIS benchmark version, it would give us more stability and allow time to manage waivers for new controls in a planned manner.
