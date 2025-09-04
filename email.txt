@@ -1,1 +1,9 @@
-Within the CRDPM BU we manage five different platforms. However, at present we only have detailed CIS benchmark data for Windows Server 2022 and Amazon Linux 2023. The remaining platforms are being excluded from this analysis for now, as only a small number of instances have been deployed.
+Rajesh and I had a discussion regarding the recent updates. Please find the summary below:
+
+Rajesh confirmed that he has analyzed the data shared last week. The issue appears to be resolved, as many instances have been deleted from the production environment.
+
+The reduction in VM count is primarily due to the deletion of a large number of instances.
+
+I will share the latest scan reports once they are generated tomorrow. Rajesh will review the data and share his analysis accordingly.
+
+Most of the instances with a CIS ID of 1 seem to belong to the UAT environment. Rajesh will verify this using the latest scan data and provide an updated analysis.
