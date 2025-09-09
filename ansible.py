@@ -375,4 +375,86 @@ elif job_type == "workflow_job":
     else:
         print(f"⚠️ Workflow {job_id} ended with status: {wf_status}")
 
+------
+
+import requests
+import json
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+# Assuming HEADERS, TOWER_HOST, payload, etc. are already defined
+
+def launch_job(job_template_id, payload):
+    """
+    Launch a job and return job_id + job_type
+    """
+    launch_url = f"{TOWER_HOST}/api/v2/job_templates/{job_template_id}/launch/"
+    response = requests.post(launch_url, headers=HEADERS, data=json.dumps(payload), verify=False)
+    response.raise_for_status()
+    
+    job = response.json()
+    job_id = job["id"]
+    job_type = job["type"]   # "job" or "workflow_job"
+    print(f"🚀 Launched {job_type}! ID: {job_id}")
+    return {"id": job_id, "type": job_type}
+
+def poll_job(job_info):
+    """
+    Poll job/workflow until completion, return final status
+    """
+    job_id = job_info["id"]
+    job_type = job_info["type"]
+
+    if job_type == "job":
+        url = f"{TOWER_HOST}/api/v2/jobs/{job_id}/"
+    else:
+        url = f"{TOWER_HOST}/api/v2/workflow_jobs/{job_id}/"
+
+    while True:
+        resp = requests.get(url, headers=HEADERS, verify=False)
+        resp.raise_for_status()
+        data = resp.json()
+        status = data["status"]
+
+        print(f"🔎 {job_type} {job_id} status: {status}")
+
+        if status in ["successful", "failed", "error", "canceled"]:
+            return {"id": job_id, "type": job_type, "status": status}
+
+        time.sleep(5)
+
+# ------------------------
+# 🚀 Kick off multiple jobs
+# ------------------------
+
+launched_jobs = []
+
+for bu, sections in jobs.items():
+    for system, job_list in sections.items():
+        for job in job_list:
+            payload = {
+                "extra_vars": job.get("extra_vars", {}),
+                "inventory": job["inventory"],
+                "job_tags": job["job_tags"],
+                # add other params as needed
+            }
+            jt_id = job["job_template"]   # assume job_template holds template id
+            launched_jobs.append(launch_job(jt_id, payload))
+
+print(f"✅ Kicked off {len(launched_jobs)} jobs")
+
+# ------------------------
+# 🔎 Poll all jobs in parallel
+# ------------------------
+
+results = []
+with ThreadPoolExecutor(max_workers=5) as executor:  # tune pool size
+    future_to_job = {executor.submit(poll_job, job): job for job in launched_jobs}
+
+    for future in as_completed(future_to_job):
+        result = future.result()
+        results.append(result)
+
+print("📊 Final Results:")
+print(json.dumps(results, indent=2))
 
