@@ -1,23 +1,13 @@
-Hello Team,
+Hi HeRan,
 
-I am currently calculating the compliance percentage of instances in AWSCentral. The percentage is derived by checking the total number of controls against the number of passed controls.
+Thanks for sharing the report. However, I was expecting a compliance report similar to the one attached. This example was shared earlier by the CRDPM team, where they had run scans that show how many controls passed for a particular platform.
 
-I have also applied the waivers shared by the GCS team, but I still do not see any instances falling under the <95% compliance category.
+If such a report isn’t available, that’s fine. What’s more important is understanding how we can get the instances compliant. Our goal is to achieve >95% compliance across all instances.
 
-Could you please help confirm the following:
+Could you please advise how we can proceed toward this goal?
 
-Whether the base images we are using are already compliant?
+Do we need to raise a support ticket for your team to investigate?
 
-If yes, what version of the CIS baseline are these images aligned with?
+If we are already using approved baselines, why might the instances still be non-compliant?
 
-Most of our instances are running on:
-
-Amazon Linux 2
-
-Amazon Linux 2023
-
-RHEL 8
-
-Additionally, could you please share the CIS scan results of the vanilla/base images for these platforms?
-
-This will help us validate if the compliance scores we are observing are consistent with the baseline expectations.
+Looking forward to your guidance on the next steps.
