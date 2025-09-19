@@ -1,13 +1,8 @@
-Hi HeRan,
+Hi Brisson,
 
-Thanks for sharing the report. However, I was expecting a compliance report similar to the one attached. This example was shared earlier by the CRDPM team, where they had run scans that show how many controls passed for a particular platform.
+I don’t currently have access to the Box folder. Surjeet also checked the location you mentioned but couldn’t find any results there, which is why I requested the reports to be sent manually.
 
-If such a report isn’t available, that’s fine. What’s more important is understanding how we can get the instances compliant. Our goal is to achieve >95% compliance across all instances.
+Could you please provide me with access to this folder so that I can start retrieving the reports directly from next week onward?
 
-Could you please advise how we can proceed toward this goal?
-
-Do we need to raise a support ticket for your team to investigate?
-
-If we are already using approved baselines, why might the instances still be non-compliant?
-
-Looking forward to your guidance on the next steps.
+Thanks for your help,
+Sarthak
