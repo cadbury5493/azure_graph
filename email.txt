@@ -1,13 +1,8 @@
-Based on Jack’s note, his team is not responsible for ensuring the image itself is compliant. He also mentioned that running instances do not necessarily need to meet image standards. While some deviation from the base image is understandable, we are seeing more than 50 controls failing per instance, which indicates a potentially fundamental issue that goes beyond minor drift.
+In the security-approved configuration for Amazon Linux 2023, there is a column called “Is Control Disable.”
+Could you please clarify its meaning? Specifically:
 
-Jack also suggested that GCS define an exceptions process, but after checking with the GCS team, it seems highly unlikely that exceptions would be granted for such a large CIS control set.
+If the value is 1 for a particular control, does that indicate the control has been approved by GCS and granted a waiver?
 
-From my perspective, the Application teams that provision and manage these instances should take ownership of the findings. They are best positioned to:
+I ask because I received a separate list of exceptions from GCS, and it does not match the rows where this column is set to 1.
 
-Review the failing controls,
-
-Identify what can be remediated, and
-
-Request waivers for any justified exceptions.
-
-Additionally, the Bronson scan logs shared do not provide actionable data. They lack details such as the CIS baseline/version used for the scans, and each file shows a constant total of 258 controls, which should vary across different platforms.
+If the “Is Control Disable” column is also intended to represent approved exceptions, I can reconcile the two lists and add any missing controls from the GCS list to the waiver set so these controls can be marked as skipped rather than failed.
