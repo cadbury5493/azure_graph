@@ -1,8 +1,13 @@
-Hi Brisson,
+Based on Jack’s note, his team is not responsible for ensuring the image itself is compliant. He also mentioned that running instances do not necessarily need to meet image standards. While some deviation from the base image is understandable, we are seeing more than 50 controls failing per instance, which indicates a potentially fundamental issue that goes beyond minor drift.
 
-I don’t currently have access to the Box folder. Surjeet also checked the location you mentioned but couldn’t find any results there, which is why I requested the reports to be sent manually.
+Jack also suggested that GCS define an exceptions process, but after checking with the GCS team, it seems highly unlikely that exceptions would be granted for such a large CIS control set.
 
-Could you please provide me with access to this folder so that I can start retrieving the reports directly from next week onward?
+From my perspective, the Application teams that provision and manage these instances should take ownership of the findings. They are best positioned to:
 
-Thanks for your help,
-Sarthak
+Review the failing controls,
+
+Identify what can be remediated, and
+
+Request waivers for any justified exceptions.
+
+Additionally, the Bronson scan logs shared do not provide actionable data. They lack details such as the CIS baseline/version used for the scans, and each file shows a constant total of 258 controls, which should vary across different platforms.
