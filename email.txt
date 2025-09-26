@@ -1,12 +1,24 @@
-“I respectfully disagree with this view. While it’s reasonable for some controls from the approved baseline to fail, the current numbers are much higher than acceptable—on average 50 controls failing on Amazon Linux 2023, 80 on Amazon Linux 2, and 60 on RHEL 8. This suggests a fundamental issue that needs investigation.
+Hi Lucy,
 
-I recommend we:
+As per the last report you shared on the 19th:
 
-Verify that the correct, approved baseline images are being used.
+Prod scans are generated on Sunday (14th)
 
-Confirm that the controls with approved exceptions are actually being skipped as intended.
+Dev scans on Wednesday (17th)
 
-I’ve also checked with the GCS team, and granting waivers for such a large number of controls is not advisable.
-For now, we should focus on remediating the basic failing controls that should be enforced by the base image—e.g., enabling features like cramfs—so that application teams don’t need to re-enable them.
+UAT scans on Thursday (18th)
 
-Separately, GCS can evaluate whether a broader exception process that is enforceable and auditable can be defined in the future (Prabhu to explore). But our immediate priority should be investigating these failures and redeploying with corrected configurations where possible.”
+I checked the Box folder but don’t see any Inspector Reports for Wednesday (Dev) or Thursday (UAT), so I currently don’t have any Dev or UAT data.
+
+I also noticed that 29 Excel files were uploaded on Sunday.
+However, all 29 files are Prod results, whereas we should ideally have 29 files in total distributed as follows:
+
+10 Prod
+
+10 UAT
+
+9 Dev
+
+This indicates that the uploaded data is incomplete and inaccurate.
+Could you please upload the Dev, UAT, and Prod data to Box properly and let me know once it’s done?
+Without this data, we’re unable to perform this week’s scans.
