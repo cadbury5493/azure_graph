@@ -1,4 +1,40 @@
 import os
+import re
+
+# Define account ID to environment mapping
+account_env_map = {
+    "045343430433": "prod",
+    "123456789012": "dev",
+    "987654321098": "uat"
+}
+
+# Directory where your CSV files are stored
+directory = "./"  # change this if needed
+
+# Regex to extract region and account ID from the filename
+pattern = re.compile(r"InspectorCISScanReport_(?P<region>[^_]+)_(?P<account_id>\d+)_")
+
+for filename in os.listdir(directory):
+    if filename.endswith(".csv"):
+        match = pattern.search(filename)
+        if match:
+            region = match.group("region")
+            account_id = match.group("account_id")
+
+            if account_id in account_env_map:
+                env = account_env_map[account_id]
+                new_name = f"{env}_{region}.csv"
+                old_path = os.path.join(directory, filename)
+                new_path = os.path.join(directory, new_name)
+
+                # Rename file
+                os.rename(old_path, new_path)
+                print(f"Renamed: {filename} → {new_name}")
+            else:
+                print(f"Skipped (unknown account): {filename}")
+
+----
+import os
 import csv
 import json
 from datetime import datetime
