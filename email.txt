@@ -1,24 +1,54 @@
-Hi Lucy,
+Current State (AWSCentral)
 
-As per the last report you shared on the 19th:
+AWSCentral is currently using AWS Inspector as the compliance scanning solution for managed instances running within the AWS environment.
 
-Prod scans are generated on Sunday (14th)
+Issues Identified
 
-Dev scans on Wednesday (17th)
+Lack of Baseline Evidence
+None of the current instances are fully compliant. To investigate further, we do not have scan evidence or baseline results from vanilla (unmodified) base images for:
 
-UAT scans on Thursday (18th)
+Amazon Linux 2
 
-I checked the Box folder but don’t see any Inspector Reports for Wednesday (Dev) or Thursday (UAT), so I currently don’t have any Dev or UAT data.
+Amazon Linux 2023
 
-I also noticed that 29 Excel files were uploaded on Sunday.
-However, all 29 files are Prod results, whereas we should ideally have 29 files in total distributed as follows:
+RHEL 8
 
-10 Prod
+Partial Compliance Despite Waivers
+All managed instances are approximately 76% compliant, even after applying approved waivers (excluding waivers containing alphanumeric identifiers). This indicates additional underlying non-compliance issues.
 
-10 UAT
+Uncontrolled CIS Benchmark Versions
+The CIS Benchmark version used by AWS Inspector changes automatically whenever CIS releases a new version. This leads to scan result variability and non-compliance drift, as these newer versions are not part of the approved baseline standards currently used by the teams.
 
-9 Dev
+Alternative Solution (AWSFederated)
 
-This indicates that the uploaded data is incomplete and inaccurate.
-Could you please upload the Dev, UAT, and Prod data to Box properly and let me know once it’s done?
-Without this data, we’re unable to perform this week’s scans.
+The AWSFederated team has developed a new compliance solution using AWS Systems Manager (SSM) that addresses the limitations of AWS Inspector.
+
+Key Features
+
+Supports Custom CIS Profiles, which can be stored in GitHub or S3 repositories.
+
+Runs compliance scans against AWS-managed instances using these custom profiles.
+
+Transforms and exports the scan results into a customized format suitable for ingestion into Splunk, providing unified reporting and analytics.
+
+Next Steps
+Requests from AWSCentral
+
+Spin up vanilla base images for:
+
+Amazon Linux 2
+
+Amazon Linux 2023
+
+RHEL 8
+
+These images should be scanned using both Qualys (by GCS) and AWS Inspector to capture baseline compliance results.
+This will help determine whether remediation should occur at the base image level or be handled by individual application teams.
+
+Requests from AWSFederated
+
+Conduct a collaborative working session with AWSCentral to:
+
+Align on sourcing and maintaining CIS Benchmark profiles from AWSCentral’s repositories.
+
+Finalize the integration of these benchmarks within the AWS SSM–based compliance scanning workflow.
