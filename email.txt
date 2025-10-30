@@ -1,54 +1,15 @@
-Current State (AWSCentral)
+Compliance Issues on Base Images – Request for Confirmation and Scan Evidence
 
-AWSCentral is currently using AWS Inspector as the compliance scanning solution for managed instances running within the AWS environment.
+Hi Jack,
 
-Issues Identified
+Hope you're doing well. Thank you for spinning up the instances for Amazon Linux 2, Amazon Linux 2023, and RHEL 8 base images.
 
-Lack of Baseline Evidence
-None of the current instances are fully compliant. To investigate further, we do not have scan evidence or baseline results from vanilla (unmodified) base images for:
+Upon analysis, we found that both Qualys and Inspector reports are flagging the base images as failures, even after applying waivers. The identified failures have been compared against the approved baselines for verification. When we checked with the Image Bakery team, they mentioned that only the RHEL 9 images have been certified.
 
-Amazon Linux 2
+Could you please confirm if your team baked these images? If so, can we proceed with applying the necessary fixes on the base images, or would it be preferable to request waivers to bring these images into compliance?
+Additionally, if your team has an approved version of these images, could you please share the evidence of scan results from both Qualys and Inspector?
 
-Amazon Linux 2023
+I've attached an Excel file containing the compliance status and failing controls, along with our comparative analysis of the Qualys and Inspector scan results.
 
-RHEL 8
-
-Partial Compliance Despite Waivers
-All managed instances are approximately 76% compliant, even after applying approved waivers (excluding waivers containing alphanumeric identifiers). This indicates additional underlying non-compliance issues.
-
-Uncontrolled CIS Benchmark Versions
-The CIS Benchmark version used by AWS Inspector changes automatically whenever CIS releases a new version. This leads to scan result variability and non-compliance drift, as these newer versions are not part of the approved baseline standards currently used by the teams.
-
-Alternative Solution (AWSFederated)
-
-The AWSFederated team has developed a new compliance solution using AWS Systems Manager (SSM) that addresses the limitations of AWS Inspector.
-
-Key Features
-
-Supports Custom CIS Profiles, which can be stored in GitHub or S3 repositories.
-
-Runs compliance scans against AWS-managed instances using these custom profiles.
-
-Transforms and exports the scan results into a customized format suitable for ingestion into Splunk, providing unified reporting and analytics.
-
-Next Steps
-Requests from AWSCentral
-
-Spin up vanilla base images for:
-
-Amazon Linux 2
-
-Amazon Linux 2023
-
-RHEL 8
-
-These images should be scanned using both Qualys (by GCS) and AWS Inspector to capture baseline compliance results.
-This will help determine whether remediation should occur at the base image level or be handled by individual application teams.
-
-Requests from AWSFederated
-
-Conduct a collaborative working session with AWSCentral to:
-
-Align on sourcing and maintaining CIS Benchmark profiles from AWSCentral’s repositories.
-
-Finalize the integration of these benchmarks within the AWS SSM–based compliance scanning workflow.
+Thanks,
+Sarthak
