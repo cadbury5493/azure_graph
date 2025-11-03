@@ -13,3 +13,10 @@ I've attached an Excel file containing the compliance status and failing control
 
 Thanks,
 Sarthak
+
+
+{
+  "sourceType": "S3",
+  "sourceInfo": "{\"path\":\"https://s3.amazonaws.com/my-ssm-compliance/PortCheck/controls.rb\"}"
+}
+
