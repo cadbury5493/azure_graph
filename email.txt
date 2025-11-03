@@ -15,8 +15,5 @@ Thanks,
 Sarthak
 
 
-{
-  "sourceType": "S3",
-  "sourceInfo": "{\"path\":\"https://s3.amazonaws.com/my-ssm-compliance/PortCheck/controls.rb\"}"
-}
+{"path":"https://my-ssm-compliance.s3.us-east-1.amazonaws.com/PortCheck.zip"}
 
