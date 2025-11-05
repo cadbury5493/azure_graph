@@ -56,9 +56,15 @@ def process_json_object(s3, bucket, key):
     region = parts[3]
     environment = parts[4]
     instance_file = parts[5]
-    base_name = instance_file.replace(".json", "")
-    instance_name = re.sub(r"-\d{4}-\d{2}-\d{2}-T\d{2}-\d{2}-\d{2}Z$", "", base_name)
+    base_name = instance_file.rsplit(".json", 1)[0]  # remove .json
 
+    # find start of timestamp like -2025-11-05-T
+    m = re.search(r"-\d{4}-\d{2}-\d{2}-T", base_name)
+    if m:
+        instance_name = base_name[:m.start()]
+    else:
+        instance_name = base_name
+    
     host_name = f"Name@{instance_name}"
 
     results = []
