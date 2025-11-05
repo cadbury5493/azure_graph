@@ -56,7 +56,9 @@ def process_json_object(s3, bucket, key):
     region = parts[3]
     environment = parts[4]
     instance_file = parts[5]
-    instance_name = instance_file.replace(".json", "")
+    base_name = instance_file.replace(".json", "")
+    instance_name = re.sub(r"-\d{4}-\d{2}-\d{2}-T\d{2}-\d{2}-\d{2}Z$", "", base_name)
+
     host_name = f"Name@{instance_name}"
 
     results = []
