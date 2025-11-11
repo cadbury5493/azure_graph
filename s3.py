@@ -93,7 +93,12 @@ def process_json_object(s3, bucket, key):
 
 def main():
     s3 = get_client()
-    s3_path = "s3://prod-db-backup-daily/DM018/weekly-reports/"
+
+    today = datetime.utcnow()
+    target_date = (today - timedelta(days=(today.weekday() + 1) % 7)).strftime("%Y-%m-%d")
+
+    s3_path = f"s3://prod-db-backup-daily/DM018/weekly-reports/{target_date}"
+    
     parsed = urlparse(s3_path)
     bucket = parsed.netloc
     prefix = parsed.path.lstrip("/")
