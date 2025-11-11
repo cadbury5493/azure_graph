@@ -15,42 +15,6 @@ Thanks,
 Sarthak
 
 
-{"path":"https://my-ssm-compliance.s3.us-east-1.amazonaws.com/PortCheck.zip"}
-
-
-index=ssc_inspec bunit=crdpm overall_status="failed"
-| spath path=results{} output=results
-| mvexpand results
-| spath input=results
-| search status="failed"
-| eval reason=title . ": " . code_desc
-| stats values(reason) as failed_reasons values(platform) as platform values(environment) as environment by host_name
-| eval failed_reasons=mvjoin(failed_reasons, "; ")
-| table host_name platform environment failed_reasons
-
-
-index=ssc_inspec bunit=crdpm
-| spath path=results{} output=results
-| mvexpand results
-| spath input=results
-| search status="failed"
-| eval reason=code_desc
-| stats values(reason) as failed_reasons values(platform) as platform values(environment) as environment first(overall_status) as overall_status by host_name
-| eval failed_reasons=mvjoin(failed_reasons, " || ")
-| table host_name platform environment overall_status failed_reasons
-
-
-index=ssc_inspec bunit=crdpm status="failed"
-| spath output=outer_status path=status           # save top-level status first
-| spath path=results{} output=results
-| mvexpand results
-| spath input=results
-| search status="failed"                          # this matches inner result.status
-| eval reason=coalesce(code_desc, "")            # keep only code_desc as reason
-| stats values(reason) as failed_reasons values(platform) as platform values(environment) as environment by host_name outer_status
-| eval failed_reasons=mvjoin(failed_reasons, " || ")
-| table host_name platform environment outer_status failed_reasons
-
 
 
 index=ssc_inspec bunit=crdpm
