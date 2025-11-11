@@ -53,3 +53,14 @@ index=ssc_inspec bunit=crdpm status="failed"
 
 
 
+index=ssc_inspec bunit=crdpm
+| spath output=outer_status path=status                   # extract top-level status before expanding results
+| spath path=results{} output=results
+| mvexpand results
+| spath input=results
+| eval reason=if(status=="failed", code_desc, null())      # only capture failed inner results
+| stats values(reason) as failed_reasons values(platform) as platform values(environment) as environment values(outer_status) as outer_status by host_name
+| eval failed_reasons=if(isnull(failed_reasons), "None", mvjoin(failed_reasons, " || "))
+| table host_name platform environment outer_status failed_reasons
+
+
