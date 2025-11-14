@@ -46,4 +46,13 @@ def get_original_name(name):
 
 all_hosts["Name"] = all_hosts["_name_lower"].apply(get_original_name)
 
-# Reorder colu
+# Reorder columns
+all_hosts = all_hosts[["Name", "Status"]]
+
+# Save output
+all_hosts.to_csv(output_file, index=False)
+print("Done! Output saved to:", output_file)
+print("Total unique hosts:", len(all_hosts))
+print("Matches:", sum(all_hosts["Status"]=="match_in_azure_and_cmdb"))
+print("In Azure only:", sum(all_hosts["Status"]=="in_azure_not_in_cmdb"))
+print("In CMDB only:", sum(all_hosts["Status"]=="in_cmdb_not_in_azure"))
