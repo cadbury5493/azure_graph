@@ -1,6 +1,4 @@
-=IF(COUNTIFS($B:$B, B2, $C:$C, C2)=1,
-    IF(COUNTIF($B$2:B2, B2)=1, "Latest", "Duplicate"),
-    IF(MAXIFS($C:$C, $B:$B, B2)=C2, "Latest", "Duplicate"))
+=IF(C2=MAXIFS($C:$C,$B:$B,B2),"Latest","Duplicate")
 
 
 
