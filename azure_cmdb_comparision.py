@@ -1,48 +1,47 @@
 import pandas as pd
 
-# ---------------------------------
+# -------------------------------
 # CONFIG
-cmdb_file = "cmdb.xlsx"
-azure_file = "azure_hosts.xlsx"
+cmdb_file = "cmdb.csv"
+azure_file = "azure.csv"
 
-cmdb_name_col = "Name"     # column name in CMDB
-azure_name_col = "Name"    # column name in Azure hosts
+name_column = "Name"   # column name in BOTH CSVs
+output_file = "comparison_output.csv"
+# -------------------------------
 
-output_prefix = "comparison_output"
-# ---------------------------------
+# Load CSVs
+cmdb = pd.read_csv(cmdb_file)
+azure = pd.read_csv(azure_file)
 
-# Load both files
-cmdb = pd.read_excel(cmdb_file)
-azure = pd.read_excel(azure_file)
+# Normalize case (lowercase names for comparison)
+cmdb["_name_lower"] = cmdb[name_column].astype(str).str.lower().str.strip()
+azure["_name_lower"] = azure[name_column].astype(str).str.lower().str.strip()
 
-# Normalize hostnames to lowercase for comparison
-cmdb["__name_lower__"] = cmdb[cmdb_name_col].astype(str).str.lower().str.strip()
-azure["__name_lower__"] = azure[azure_name_col].astype(str).str.lower().str.strip()
+# ---- Determine membership ----
+cmdb_set = set(cmdb["_name_lower"])
+azure_set = set(azure["_name_lower"])
 
-# --- 1) MATCHES IN BOTH ---
-matches = pd.merge(
-    azure, cmdb,
-    on="__name_lower__", 
-    suffixes=("_azure", "_cmdb"),
-    how="inner"
-)
-matches["status"] = "match_in_azure_and_cmdb"
+# ---- Build unified list of all names ----
+all_names = pd.DataFrame({"_name_lower": list(cmdb_set | azure_set)})
 
-# --- 2) IN AZURE BUT NOT IN CMDB ---
-azure_only = azure[~azure["__name_lower__"].isin(cmdb["__name_lower__"])]
-azure_only["status"] = "in_azure_not_in_cmdb"
+# Merge original data for reference
+all_names = all_names.merge(azure, on="_name_lower", how="left", suffixes=("", "_azure"))
+all_names = all_names.merge(cmdb, on="_name_lower", how="left", suffixes=("_azure", "_cmdb"))
 
-# --- 3) IN CMDB BUT NOT IN AZURE ---
-cmdb_only = cmdb[~cmdb["__name_lower__"].isin(azure["__name_lower__"])]
-cmdb_only["status"] = "in_cmdb_not_in_azure"
+# ---- Determine status for each row ----
+def compute_status(row):
+    in_azure = pd.notna(row[name_column])
+    in_cmdb = pd.notna(row[name_column + "_cmdb"])
+    
+    if in_azure and in_cmdb:
+        return "match_in_azure_and_cmdb"
+    elif in_azure and not in_cmdb:
+        return "in_azure_not_in_cmdb"
+    else:
+        return "in_cmdb_not_in_azure"
 
-# Save results to Excel files
-matches.to_excel(f"{output_prefix}_matches.xlsx", index=False)
-azure_only.to_excel(f"{output_prefix}_azure_only.xlsx", index=False)
-cmdb_only.to_excel(f"{output_prefix}_cmdb_only.xlsx", index=False)
+all_names["Status"] = all_names.apply(compute_status, axis=1)
 
-print("Comparison completed!")
-print("Files created:")
-print(f" - {output_prefix}_matches.xlsx")
-print(f" - {output_prefix}_azure_only.xlsx")
-print(f" - {output_prefix}_cmdb_only.xlsx")
+# Output
+all_names.to_csv(output_file, index=False)
+print("Done! Output saved to:", output_file)
