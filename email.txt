@@ -1,3 +1,7 @@
+Currently, our CMDB Azure Databricks data contains multiple hosts with the same IP address. Each Friday, we take a weekly dump from the CMDB, keep only the latest updated host, and mark the others as duplicates before retiring them.
+
+It would be much better if this could be corrected at the source. If the CMDB handled duplicate detection and retirement automatically, the issue would be resolved at the root instead of requiring manual cleanup in our process.
+
 =IF(C2=MAXIFS($C:$C,$B:$B,B2),"Latest","Duplicate")
 
 
