@@ -1,9 +1,12 @@
 | eval creation_date_ms=replace(creation_date, "\.(\d{3})\d{3}\+", ".\1+")
 | eval creation_epoch=strptime(creation_date_ms, "%Y-%m-%dT%H:%M:%S.%3N%z")
 | eval now_epoch=now()
-| eval running_ga_status=if((now_epoch - creation_epoch) > 48*3600,
-                             "running_ga_not_applied",
-                             "less_than_48hrs")
+| eval running_ga_status=case(
+        scanned="Y", "scanned_ga_applied",
+        scanned="N" AND (now_epoch - creation_epoch) > 48*3600, "running_ga_not_applied",
+        scanned="N", "less_than_48hrs"
+    )
+
 
 
 ---
