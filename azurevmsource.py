@@ -1,8 +1,10 @@
-import json
-from datetime import datetime
 from azure.identity import ClientSecretCredential
 from azure.mgmt.resource import SubscriptionClient
 from azure.mgmt.compute import ComputeManagementClient
+from azure.mgmt.resourcegraph import ResourceGraphClient
+from azure.mgmt.resourcegraph.models import QueryRequest
+import json
+from datetime import datetime
 
 # -------------------------------
 # CONFIGURATION
@@ -25,11 +27,32 @@ credential = ClientSecretCredential(
 )
 
 subscription_client = SubscriptionClient(credential)
+resource_graph_client = ResourceGraphClient(credential)
+
+# -------------------------------
+# FETCH VM CREATION DATES FROM RESOURCE GRAPH
+# -------------------------------
+creation_query = QueryRequest(
+    subscriptions=[s.subscription_id for s in subscription_client.subscriptions.list()],
+    query="""
+        Resources
+        | where type =~ 'Microsoft.Compute/virtualMachines'
+        | project id, name, subscriptionId, timeCreated = properties.timeCreated
+    """
+)
+
+creation_results = resource_graph_client.resources(creation_query)
+
+# Store creation dates in a dictionary for lookup
+creation_map = {
+    item["id"]: item.get("timeCreated")
+    for item in creation_results.data
+}
 
 # -------------------------------
 # MAIN INVENTORY LOGIC
 # -------------------------------
-vm_inventory = []  # Final JSON list
+vm_inventory = []
 total_vm_count = 0
 
 for sub in subscription_client.subscriptions.list():
@@ -47,21 +70,18 @@ for sub in subscription_client.subscriptions.list():
     for vm in vms:
         total_vm_count += 1
 
-        # VM name
+        vm_id = vm.id
         host_name = vm.name
-
-        # Region
         region = vm.location
-
-        # Environment tag (if exists)
         environment = vm.tags.get("environment") if vm.tags else "unknown"
 
-        # OS Platform detection
+        # Determine OS platform
         platform = "unknown"
-        if vm.storage_profile and vm.storage_profile.os_disk and vm.storage_profile.os_disk.os_type:
-            platform = str(vm.storage_profile.os_disk.os_type).lower()
+        if vm.storage_profile and vm.storage_profile.os_disk:
+            if vm.storage_profile.os_disk.os_type:
+                platform = str(vm.storage_profile.os_disk.os_type).lower()
 
-        # Fetch power state (requires instance view)
+        # Fetch power state
         instance_view = compute_client.virtual_machines.instance_view(
             vm.resource_group_name, vm.name
         )
@@ -71,7 +91,9 @@ for sub in subscription_client.subscriptions.list():
             if s.code.startswith("PowerState/"):
                 status = s.code.split("/")[-1]
 
-        # Build record
+        # Lookup creation date
+        creation_date = creation_map.get(vm_id)
+
         record = {
             "bunit": BUNIT,
             "subscription": subscription_id,
@@ -80,6 +102,7 @@ for sub in subscription_client.subscriptions.list():
             "environment": environment,
             "platform": platform,
             "status": status,
+            "creation_date": creation_date,
             "exec_mode": EXEC_MODE,
             "ingestion_date": INGESTION_DATE
         }
