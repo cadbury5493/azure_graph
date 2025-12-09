@@ -1,9 +1,21 @@
-This document provides an overview of the process used to perform compliance scans across the AWS Central platform. Because we do not have automated access to Box, this process must be completed manually every Friday after the AWS Inspector scan reports are uploaded.
-
-Prerequisites
-
-Box Access – Submit an access request through SailPoint.
-
-Python Installation – Request Python access/installation through SailPoint.
-
-Required Dependencies – Install all necessary Python libraries and dependencies.
+(
+    search index="your_index" source="*ssc_azure_vm_sourcefiles*"
+    | eval host_name=lower(trim(host_name))
+    | table host_name bunit subscription region environment platform status
+    | dedup host_name
+    | rename status AS vm_status
+)
+| join type=left host_name 
+    [
+        search index="your_index" source="*ssc_azure_sourcefiles*"
+        | eval host_name=lower(trim(host_name))
+        | stats count AS scan_count BY host_name
+        | eval scanned="Y"
+    ]
+| eval scanned=if(isnull(scanned),"N",scanned)
+| eval remarks=case(
+        scanned="Y","Scanned",
+        scanned="N" AND lower(vm_status)="deallocated","Not scanned – VM is deallocated",
+        scanned="N","Not scanned – VM status: ".vm_status
+    )
+| table host_name scanned vm_status bunit subscription environment region platform remarks
