@@ -1,4 +1,5 @@
-creation_date = getattr(vm, "time_created", None)
+creation_dt = getattr(vm, "time_created", None)
+creation_date = creation_dt.isoformat() if creation_dt else None
 
 from azure.identity import ClientSecretCredential
 from azure.mgmt.resource import SubscriptionClient
