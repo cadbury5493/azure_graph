@@ -1,3 +1,5 @@
+creation_date = getattr(vm, "time_created", None)
+
 from azure.identity import ClientSecretCredential
 from azure.mgmt.resource import SubscriptionClient
 from azure.mgmt.compute import ComputeManagementClient
