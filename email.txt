@@ -18,3 +18,30 @@ index=ssc_inspec_event_idx bunit=ssc_azure
         scanned="N","Not scanned – VM status: ".vm_status
     )
 | table host_name scanned vm_status bunit subscription environment region platform remarks
+
+
+----
+
+index=ssc_inspec_event_idx bunit=ssc_azure
+| eval host_name=lower(trim(host_name))
+| table host_name bunit subscription region environment platform status creation_date
+| dedup host_name
+| rename status AS vm_status
+| join type=left host_name [
+
+    search index=ssc_inspec_event_idx bunit=azure
+    | eval host_name=lower(trim(host_name))
+    | stats count AS scan_count BY host_name
+    | eval scanned="Y"
+
+]
+| eval scanned=if(isnull(scanned),"N",scanned)
+| eval remarks=case(
+        scanned="Y","Scanned",
+        scanned="N" AND lower(vm_status)="deallocated","Not scanned – VM is deallocated",
+        scanned="N","Not scanned – VM status: ".vm_status
+    )
+| eval creation_epoch=strptime(creation_date, "%Y-%m-%dT%H:%M:%S%z") 
+| eval now_epoch=now()
+| eval running_ga_status=if((now_epoch - creation_epoch) > 48*3600, "running_ga_not_applied", "not_applicable")
+| table host_name scanned vm_status bunit subscription environment region platform remarks running_ga_status
