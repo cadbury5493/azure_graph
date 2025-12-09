@@ -1,3 +1,12 @@
+| eval creation_date_ms=replace(creation_date, "\.(\d{3})\d{3}\+", ".\1+")
+| eval creation_epoch=strptime(creation_date_ms, "%Y-%m-%dT%H:%M:%S.%3N%z")
+| eval now_epoch=now()
+| eval running_ga_status=if((now_epoch - creation_epoch) > 48*3600,
+                             "running_ga_not_applied",
+                             "less_than_48hrs")
+
+
+---
 index=ssc_inspec_event_idx bunit=ssc_azure
 | eval host_name=lower(trim(host_name))
 | table host_name bunit subscription region environment platform status
