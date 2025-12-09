@@ -1,17 +1,16 @@
-(
-    search index="your_index" source="*ssc_azure_vm_sourcefiles*"
+index=ssc_inspec_event_idx bunit=ssc_azure
+| eval host_name=lower(trim(host_name))
+| table host_name bunit subscription region environment platform status
+| dedup host_name
+| rename status AS vm_status
+| join type=left host_name [
+
+    search index=ssc_inspec_event_idx bunit=azure
     | eval host_name=lower(trim(host_name))
-    | table host_name bunit subscription region environment platform status
-    | dedup host_name
-    | rename status AS vm_status
-)
-| join type=left host_name 
-    [
-        search index="your_index" source="*ssc_azure_sourcefiles*"
-        | eval host_name=lower(trim(host_name))
-        | stats count AS scan_count BY host_name
-        | eval scanned="Y"
-    ]
+    | stats count AS scan_count BY host_name
+    | eval scanned="Y"
+
+]
 | eval scanned=if(isnull(scanned),"N",scanned)
 | eval remarks=case(
         scanned="Y","Scanned",
