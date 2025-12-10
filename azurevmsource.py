@@ -1,3 +1,50 @@
+
+
+
+def detect_detailed_os(vm):
+    """Returns detailed OS info such as Windows 2022, RHEL 8.4, Ubuntu 20.04, etc."""
+    if (not vm.storage_profile) or (not vm.storage_profile.image_reference):
+        return "unknown"
+
+    img = vm.storage_profile.image_reference
+
+    publisher = (img.publisher or "").lower()
+    offer = (img.offer or "").lower()
+    sku = (img.sku or "").lower()
+
+    # Windows Server
+    if "windows" in offer:
+        return f"windows {sku.replace('-', ' ')}"
+
+    # RedHat (RHEL)
+    if "redhat" in publisher or "rhel" in offer:
+        return f"rhel {sku}"
+
+    # Ubuntu
+    if "ubuntu" in offer:
+        normalized = sku.replace("_", ".").replace("-", " ")
+        return f"ubuntu {normalized}"
+
+    # SUSE
+    if "suse" in offer or "sles" in offer:
+        return f"suse {sku}".replace("-", " ")
+
+    # Oracle Linux
+    if "oracle" in publisher or "ol" in offer:
+        return f"oracle {sku}"
+
+    # Debian
+    if "debian" in offer:
+        return f"debian {sku}"
+
+    # Fallback
+    combo = f"{offer} {sku}".strip()
+    return combo if combo else "unknown"
+    
+    # Get detailed OS (2019/2022, RHEL, Ubuntu versions)
+        detailed_os = detect_detailed_os(vm)
+
+----
 creation_dt = getattr(vm, "time_created", None)
 creation_date = creation_dt.isoformat() if creation_dt else None
 
