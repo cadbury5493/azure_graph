@@ -1,3 +1,32 @@
+
+def extract_os_name_from_id(img_id: str) -> str:
+    """
+    Extracts OS name from an Azure Compute Gallery image ID.
+    Handles paths with and without version folders.
+    """
+    if not img_id:
+        return "unknown"
+
+    match = re.search(r"/images/([^/]+)", img_id, re.IGNORECASE)
+    return match.group(1) if match else "unknown"
+
+def detect_detailed_os(vm):
+    """Returns (os_name, os_version) using gallery image ID + exact_version."""
+    if not vm.storage_profile or not vm.storage_profile.image_reference:
+        return "unknown", "unknown"
+
+    img = vm.storage_profile.image_reference
+    img_id = getattr(img, "id", "") or ""
+
+    os_name = extract_os_name_from_id(img_id)
+
+    # Version comes from another attribute provided by you
+    os_version = getattr(img, "exact_version", "unknown")
+
+    return os_name, os_version
+
+
+------
 import re
 
 def detect_detailed_os(vm):
