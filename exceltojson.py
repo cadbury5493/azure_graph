@@ -7,35 +7,31 @@ OUTPUT_FOLDER = "json_output"
 
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-REQUIRED_HEADERS = {
-    "host ip",
-    "dns host",
-    "operating system",
-    "control id",
-    "control reference",
-    "technology",
-    "control",
-    "rationale",
-    "status",
-    "remediation",
-    "evidence"
-}
+REQUIRED_COLUMNS = [
+    "Host IP",
+    "DNS Host",
+    "Operating System",
+    "Control ID",
+    "Control Reference",
+    "Technology",
+    "Control",
+    "Rationale",
+    "Status",
+    "Remediation",
+    "Evidence"
+]
 
 def find_header_row(df):
     """
-    Finds row index where ALL required headers are present
-    (extra columns allowed)
+    Header row is identified when the first non-empty cell is 'Host IP'
+    (case-sensitive)
     """
     for idx, row in df.iterrows():
-        row_values = {
-            str(cell).strip().lower()
-            for cell in row
-            if pd.notna(cell)
-        }
-
-        if REQUIRED_HEADERS.issubset(row_values):
-            return idx
-
+        for cell in row:
+            if pd.notna(cell):
+                if str(cell).strip() == "Host IP":
+                    return idx
+                break
     return None
 
 for file in os.listdir(INPUT_FOLDER):
@@ -56,19 +52,15 @@ for file in os.listdir(INPUT_FOLDER):
     # Read again using detected header row
     df = pd.read_excel(file_path, header=header_row_index)
 
-    # Normalize column names for safe selection
-    df.columns = [str(col).strip() for col in df.columns]
+    # Extract only required columns (case-sensitive)
+    missing_cols = [col for col in REQUIRED_COLUMNS if col not in df.columns]
+    if missing_cols:
+        print(f"⚠️ Missing columns in {file}: {missing_cols}")
+        continue
 
-    # Extract only required columns (ignore extras)
-    required_columns_map = {
-        col: col.strip()
-        for col in df.columns
-        if col.strip().lower() in REQUIRED_HEADERS
-    }
+    df = df[REQUIRED_COLUMNS]
 
-    df = df[list(required_columns_map.keys())]
-
-    # Drop fully empty rows
+    # Drop completely empty rows
     df = df.dropna(how="all")
 
     # Convert to JSON
@@ -78,6 +70,6 @@ for file in os.listdir(INPUT_FOLDER):
     json_path = os.path.join(OUTPUT_FOLDER, json_file)
 
     with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
+        json.dump(data, f, indent=4)
 
     print(f"✅ Converted: {file} → {json_file}")
