@@ -7,29 +7,35 @@ OUTPUT_FOLDER = "json_output"
 
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# Required headers to detect
-REQUIRED_HEADERS = [
-    "Host IP",
-    "DNS Host",
-    "Operating System",
-    "Control ID",
-    "Control Reference",
-    "Technology",
-    "Control",
-    "Rationale",
-    "Status",
-    "Remediation",
-    "Evidence"
-]
+REQUIRED_HEADERS = {
+    "host ip",
+    "dns host",
+    "operating system",
+    "control id",
+    "control reference",
+    "technology",
+    "control",
+    "rationale",
+    "status",
+    "remediation",
+    "evidence"
+}
 
 def find_header_row(df):
     """
-    Finds the row index that contains all required headers
+    Finds row index where ALL required headers are present
+    (extra columns allowed)
     """
     for idx, row in df.iterrows():
-        row_values = row.astype(str).str.strip().tolist()
-        if all(header in row_values for header in REQUIRED_HEADERS):
+        row_values = {
+            str(cell).strip().lower()
+            for cell in row
+            if pd.notna(cell)
+        }
+
+        if REQUIRED_HEADERS.issubset(row_values):
             return idx
+
     return None
 
 for file in os.listdir(INPUT_FOLDER):
@@ -38,7 +44,7 @@ for file in os.listdir(INPUT_FOLDER):
 
     file_path = os.path.join(INPUT_FOLDER, file)
 
-    # Read without headers
+    # Read entire sheet without headers
     raw_df = pd.read_excel(file_path, header=None)
 
     header_row_index = find_header_row(raw_df)
@@ -50,10 +56,19 @@ for file in os.listdir(INPUT_FOLDER):
     # Read again using detected header row
     df = pd.read_excel(file_path, header=header_row_index)
 
-    # Keep only required columns (order preserved)
-    df = df[REQUIRED_HEADERS]
+    # Normalize column names for safe selection
+    df.columns = [str(col).strip() for col in df.columns]
 
-    # Drop completely empty rows
+    # Extract only required columns (ignore extras)
+    required_columns_map = {
+        col: col.strip()
+        for col in df.columns
+        if col.strip().lower() in REQUIRED_HEADERS
+    }
+
+    df = df[list(required_columns_map.keys())]
+
+    # Drop fully empty rows
     df = df.dropna(how="all")
 
     # Convert to JSON
