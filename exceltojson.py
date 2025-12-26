@@ -1,5 +1,50 @@
 import os
 import json
+import math
+
+JSON_FOLDER = "json_files"
+BUNIT_VALUE = "awscentral_qualys"
+
+def sanitize(obj):
+    """
+    Recursively:
+    - Replace NaN / Inf with None
+    - Add bunit to each JSON object (dict)
+    """
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+
+    if isinstance(obj, dict):
+        # Add / overwrite bunit
+        obj["bunit"] = BUNIT_VALUE
+        return {k: sanitize(v) for k, v in obj.items()}
+
+    if isinstance(obj, list):
+        return [sanitize(item) for item in obj]
+
+    return obj
+
+for file in os.listdir(JSON_FOLDER):
+    if not file.endswith(".json"):
+        continue
+
+    file_path = os.path.join(JSON_FOLDER, file)
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    clean_data = sanitize(data)
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(clean_data, f, indent=4)
+
+    print(f"✅ Sanitized and updated: {file}")
+
+---
+import os
+import json
 
 WAIVER_FILE = "waivers.yaml"
 JSON_FOLDER = "json_files"
