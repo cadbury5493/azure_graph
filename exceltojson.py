@@ -1,3 +1,52 @@
+import os
+import json
+
+WAIVER_FILE = "waivers.yaml"
+JSON_FOLDER = "json_files"
+
+# -----------------------------
+# Load waivers (NO splitting)
+# -----------------------------
+waivers = set()
+
+with open(WAIVER_FILE, "r", encoding="utf-8") as f:
+    for line in f:
+        line = line.strip()
+        if line:
+            waivers.add(line)
+
+# -----------------------------
+# Process JSON files
+# -----------------------------
+for file in os.listdir(JSON_FOLDER):
+    if not file.endswith(".json"):
+        continue
+
+    file_path = os.path.join(JSON_FOLDER, file)
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    updated = False
+
+    for item in data:
+        status = item.get("Status")
+        control_ref = item.get("Control Reference")
+
+        # Change ONLY if Status is Failed and exact match exists
+        if status == "Failed" and control_ref in waivers:
+            item["Status"] = "Skipped"
+            updated = True
+
+    if updated:
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)
+
+        print(f"✅ Updated: {file}")
+    else:
+        print(f"ℹ️ No changes: {file}")
+
+---
 import pandas as pd
 import os
 import json
