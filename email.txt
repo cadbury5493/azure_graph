@@ -18,6 +18,8 @@ index=ssc_inspec_event_idx bunit=awscentral_qualys
     2
 )
 
+| eval is_compliant_95 = if(compliance_percentage > 95, "true", "false")
+
 | rename Technology AS platform "DNS Hostname" AS host_name
 
 | table 
@@ -31,3 +33,4 @@ index=ssc_inspec_event_idx bunit=awscentral_qualys
     passed_controls
     skipped_controls
     compliance_percentage_considering_skipped_as_failed
+    is_compliant_95
