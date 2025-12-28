@@ -1,9 +1,17 @@
 index=ssc_inspec_event_idx bunit=awscentral_qualys
 | stats 
     count AS total_controls,
-    count(eval(Status="Failed")) AS failed_controls
+    count(eval(Status="Failed")) AS failed_controls,
+    count(eval(Status="Passed")) AS passed_controls,
+    count(eval(Status="Skipped")) AS skipped_controls
     BY "Host IP" Technology "DNS Hostname"
 | eval compliant_controls = total_controls - failed_controls
 | eval compliance_percentage = round((compliant_controls / total_controls) * 100, 2)
+| eval effective_total = total_controls - skipped_controls
+| eval compliance_percentage_no_skipped = if(
+    effective_total > 0,
+    round(((effective_total - failed_controls) / effective_total) * 100, 2),
+    0
+)
 | rename Technology AS platform "DNS Hostname" AS host_name
-| table "Host IP" host_name platform total_controls failed_controls compliance_percentage
+| table "Host IP" host_name platform total_controls passed_controls failed_controls skipped_controls compliance_percentage compliance_percentage_no_skipped
