@@ -1,59 +1,9 @@
-| eval creation_date_ms=replace(creation_date, "\.(\d{3})\d{3}\+", ".\1+")
-| eval creation_epoch=strptime(creation_date_ms, "%Y-%m-%dT%H:%M:%S.%3N%z")
-| eval now_epoch=now()
-| eval running_ga_status=case(
-        scanned="Y", "scanned_ga_applied",
-        scanned="N" AND (now_epoch - creation_epoch) > 48*3600, "running_ga_not_applied",
-        scanned="N", "less_than_48hrs"
-    )
-
-
-
----
-index=ssc_inspec_event_idx bunit=ssc_azure
-| eval host_name=lower(trim(host_name))
-| table host_name bunit subscription region environment platform status
-| dedup host_name
-| rename status AS vm_status
-| join type=left host_name [
-
-    search index=ssc_inspec_event_idx bunit=azure
-    | eval host_name=lower(trim(host_name))
-    | stats count AS scan_count BY host_name
-    | eval scanned="Y"
-
-]
-| eval scanned=if(isnull(scanned),"N",scanned)
-| eval remarks=case(
-        scanned="Y","Scanned",
-        scanned="N" AND lower(vm_status)="deallocated","Not scanned – VM is deallocated",
-        scanned="N","Not scanned – VM status: ".vm_status
-    )
-| table host_name scanned vm_status bunit subscription environment region platform remarks
-
-
-----
-
-index=ssc_inspec_event_idx bunit=ssc_azure
-| eval host_name=lower(trim(host_name))
-| table host_name bunit subscription region environment platform status creation_date
-| dedup host_name
-| rename status AS vm_status
-| join type=left host_name [
-
-    search index=ssc_inspec_event_idx bunit=azure
-    | eval host_name=lower(trim(host_name))
-    | stats count AS scan_count BY host_name
-    | eval scanned="Y"
-
-]
-| eval scanned=if(isnull(scanned),"N",scanned)
-| eval remarks=case(
-        scanned="Y","Scanned",
-        scanned="N" AND lower(vm_status)="deallocated","Not scanned – VM is deallocated",
-        scanned="N","Not scanned – VM status: ".vm_status
-    )
-| eval creation_epoch=strptime(creation_date, "%Y-%m-%dT%H:%M:%S%z") 
-| eval now_epoch=now()
-| eval running_ga_status=if((now_epoch - creation_epoch) > 48*3600, "running_ga_not_applied", "not_applicable")
-| table host_name scanned vm_status bunit subscription environment region platform remarks running_ga_status
+index=ssc_inspec_event_idx bunit=awscentral_qualys
+| stats 
+    count AS total_controls,
+    count(eval(Status="Failed")) AS failed_controls
+    BY "Host IP" Technology "DNS Hostname"
+| eval compliant_controls = total_controls - failed_controls
+| eval compliance_percentage = round((compliant_controls / total_controls) * 100, 2)
+| rename Technology AS platform "DNS Hostname" AS host_name
+| table "Host IP" host_name platform total_controls failed_controls compliance_percentage
