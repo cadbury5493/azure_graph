@@ -1,5 +1,32 @@
 index=ssc_inspec_event_idx bunit=awscentral_qualys
 | stats 
+    count AS total_controls,
+    count(eval(Status="Passed")) AS passed_controls,
+    count(eval(Status="Skipped")) AS skipped_controls
+    BY "Host IP" "DNS Hostname"
+
+| eval passed_skipped_controls = passed_controls + skipped_controls
+
+| eval host_compliance_pct = round(
+    (passed_skipped_controls / total_controls) * 100,
+    2
+)
+
+| eval is_compliant_95 = if(host_compliance_pct > 95, 1, 0)
+
+| stats
+    sum(is_compliant_95) AS passing_hosts
+    count AS hosts_scanned
+
+| eval overall_compliance_pct = round(
+    (passing_hosts / hosts_scanned) * 100,
+    2
+)
+
+| fields overall_compliance_pct
+---
+index=ssc_inspec_event_idx bunit=awscentral_qualys
+| stats 
     count AS total_controls
     BY "Host IP" "DNS Hostname"
 
