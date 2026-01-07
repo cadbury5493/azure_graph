@@ -21,12 +21,10 @@ index=ssc_inspec_event_idx bunit=awscentral_qualys
     dc(host_key) AS hosts_scanned
     count(eval(is_compliant_95="true")) AS passing_hosts
     count(eval(is_compliant_95="false")) AS failing_hosts
-    sum(passed_skipped_controls) AS total_passed_skipped_controls
-    sum(total_controls) AS total_controls
     BY Technology
 
 | eval compliance_pct = round(
-    (total_passed_skipped_controls / total_controls) * 100,
+    (passing_hosts / hosts_scanned) * 100,
     2
 )
 
@@ -38,6 +36,7 @@ index=ssc_inspec_event_idx bunit=awscentral_qualys
     passing_hosts
     failing_hosts
     compliance_pct
+
 
 
 
