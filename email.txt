@@ -6,30 +6,30 @@ index=ssc_inspec_event_idx bunit=awscentral_qualys
     BY "Host IP" Technology
 
 | eval passed_skipped_controls = passed_controls + skipped_controls
-
-| eval compliance_pct = round(
-    (passed_skipped_controls / total_controls) * 100,
-    2
-)
-
-| eval host_status = if(compliance_pct >= 95, "Passing", "Failing")
+| eval host_compliance_pct = (passed_skipped_controls / total_controls) * 100
+| eval host_status = if(host_compliance_pct >= 95, "Passed", "Failed")
 
 | stats
     dc("Host IP") AS hosts_scanned
-    count(eval(host_status="Passing")) AS passing_hosts
-    count(eval(host_status="Failing")) AS failing_hosts
-    avg(compliance_pct) AS compliance_pct
+    count(eval(host_status="Passed")) AS passing_hosts
+    count(eval(host_status="Failed")) AS failing_hosts
+    sum(passed_skipped_controls) AS total_passed_skipped_controls
+    sum(total_controls) AS total_controls
     BY Technology
 
-| eval compliance_pct = round(compliance_pct, 2)
-| rename Technology AS platform
+| eval compliance_pct = round(
+    (total_passed_skipped_controls / total_controls) * 100,
+    2
+)
 
+| rename Technology AS platform
 | table
     platform
     hosts_scanned
     passing_hosts
     failing_hosts
     compliance_pct
+
 
 
 
