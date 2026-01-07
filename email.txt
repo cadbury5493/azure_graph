@@ -2,12 +2,18 @@ index=ssc_inspec_event_idx bunit=awscentral_qualys
 | stats 
     count AS total_controls,
     count(eval(Status="Passed")) AS passed_controls,
+    count(eval(Status="Failed")) AS failed_controls,
     count(eval(Status="Skipped")) AS skipped_controls
     BY "Host IP" Technology
 
 | eval passed_skipped_controls = passed_controls + skipped_controls
-| eval host_compliance_pct = (passed_skipped_controls / total_controls) * 100
-| eval host_status = if(host_compliance_pct >= 95, "Passed", "Failed")
+
+| eval compliance_pct = round(
+    (passed_skipped_controls / total_controls) * 100,
+    2
+)
+
+| eval host_status = if(compliance_pct > 95, "Passed", "Failed")
 
 | stats
     dc("Host IP") AS hosts_scanned
@@ -23,6 +29,7 @@ index=ssc_inspec_event_idx bunit=awscentral_qualys
 )
 
 | rename Technology AS platform
+
 | table
     platform
     hosts_scanned
