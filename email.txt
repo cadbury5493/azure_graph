@@ -1,19 +1,55 @@
-Hi Karl,
+index=ssc_inspec_event_idx bunit=awscentral_qualys
+| stats 
+    count AS total_controls,
+    count(eval(Status="Passed")) AS passed_controls,
+    count(eval(Status="Failed")) AS failed_controls,
+    count(eval(Status="Skipped")) AS skipped_controls
+    BY "Host IP" Technology
 
-Below is the analysis of the Qualys reports that we shared earlier.
+| eval passed_skipped_controls = passed_controls + skipped_controls
 
-The Qualys reports are generated without any waivers applied. For Amazon Linux 2, Windows Server 2022, Windows Server 2019, and RHEL 9, there are no waivers provided. Therefore, the compliance percentages shown in Qualys for these platforms are accurate. That said, none of the instances on these platforms are currently compliant. Also, please note that the number of hosts scanned for these platforms is very low — you can refer to the Hosts Scanned column for details.
+| eval compliance_with_waivers = round(
+    (passed_skipped_controls / total_controls) * 100,
+    2
+)
 
-The good news is that I have taken the Qualys scans for Amazon Linux 2023 and applied the waivers provided by GCS. After applying these waivers, all AL2023 instances are now compliant.
+| eval compliance_without_waivers = round(
+    (passed_controls / total_controls) * 100,
+    2
+)
 
-However, for RHEL 8, even after applying the available waivers, none of the instances are compliant. We will need to follow up on this further. I plan to look into this in more detail once I am back.
+| eval host_status_with_waivers = if(compliance_with_waivers >= 95, "Passing", "Failing")
+| eval host_status_without_waivers = if(compliance_without_waivers >= 95, "Passing", "Failing")
 
-I have captured all these details in the attached Excel file for reference.
+| stats
+    dc("Host IP") AS hosts_scanned
 
-Please let me know if you have any questions.
+    count(eval(host_status_with_waivers="Passing")) AS passing_hosts_with_waivers
+    count(eval(host_status_with_waivers="Failing")) AS failing_hosts_with_waivers
 
-Best regards,
-Sarthak S.
+    count(eval(host_status_without_waivers="Passing")) AS passing_hosts_without_waivers
+    count(eval(host_status_without_waivers="Failing")) AS failing_hosts_without_waivers
+
+    avg(compliance_with_waivers) AS compliance_pct_with_waivers
+    avg(compliance_without_waivers) AS compliance_pct_without_waivers
+
+    BY Technology
+
+| eval compliance_pct_with_waivers = round(compliance_pct_with_waivers, 2)
+| eval compliance_pct_without_waivers = round(compliance_pct_without_waivers, 2)
+
+| rename Technology AS platform
+
+| table
+    platform
+    hosts_scanned
+    passing_hosts_with_waivers
+    failing_hosts_with_waivers
+    passing_hosts_without_waivers
+    failing_hosts_without_waivers
+    compliance_pct_with_waivers
+    compliance_pct_without_waivers
+
 
 ----
 index=ssc_inspec_event_idx bunit=awscentral_qualys
