@@ -56,7 +56,7 @@
           "TS=$(date -u +\"%Y-%m-%dT%H-%M-%SZ\")",
           "# --- Files ---",
           "SCRIPT_NAME='scriptfile.sh'",
-          "REPORT_FILE='inspec-report.json'",
+          "REPORT_FILE='Report-Compliance-20200225'",
           "# --- S3 Locations ---",
           "SCRIPT_BUCKET='chf-binaries'",
           "SCRIPT_PREFIX='script'",
