@@ -1,3 +1,12 @@
+ curl -s \
+  "https://omnitruck.chef.io/stable/chef-workstation/metadata?v=25.9.1094&p=amazon&pv=2&m=x86_64" \
+  > metadata.json
+
+  curl -L -o chef-workstation.rpm https://packages.chef.io/files/stable/chef-workstation/25.9.1094/el/7/chef-workstation-25.9.1094-1.el7.x86_64.rpm
+
+file chef-workstation.rpm
+
+----------
 # On public machine Download chef rpm
 
 curl -s \
