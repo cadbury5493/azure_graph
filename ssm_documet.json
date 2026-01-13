@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "2.2",
+  "description": "Run InSpec, save JSON, then upload JSON to S3 under logs/YYYY-MM-DD/<instance-id>-timestamp.json",
+  "parameters": {
+    "sourceType": {
+      "description": "(Required) Specify the source type.",
+      "type": "String",
+      "allowedValues": [
+        "GitHub",
+        "S3"
+      ]
+    },
+    "sourceInfo": {
+      "description": "(Required) Source info",
+      "type": "StringMap",
+      "displayType": "textarea",
+      "default": {}
+    }
+  },
+  "mainSteps": [
+    {
+      "action": "aws:downloadContent",
+      "name": "downloadContent",
+      "inputs": {
+        "sourceType": "{{ sourceType }}",
+        "sourceInfo": "{{ sourceInfo }}"
+      }
+    },
+    {
+      "precondition": {
+        "StringEquals": [
+          "platformType",
+          "Linux"
+        ]
+      },
+      "action": "aws:runShellScript",
+      "name": "runInSpecLinux",
+      "inputs": {
+        "runCommand": [
+          "#!/bin/bash",
+          "set -euo pipefail",
+          "if ! command -v curl >/dev/null 2>&1; then",
+          "  echo 'curl is missing from the instance!'",
+          "  exit 1",
+          "fi",
+          "if ! command -v aws >/dev/null 2>&1; then",
+          "  echo 'AWS CLI is missing from the instance!'",
+          "  exit 1",
+          "fi",
+          "# --- Metadata ---",
+          "TOKEN=$(curl -sS -X PUT \"http://169.254.169.254/latest/api/token\" -H \"X-aws-ec2-metadata-token-ttl-seconds: 21600\")",
+          "INSTANCE_ID=$(curl -sS -H \"X-aws-ec2-metadata-token: $TOKEN\" http://169.254.169.254/latest/meta-data/instance-id)",
+          "AZ=$(curl -sS -H \"X-aws-ec2-metadata-token: $TOKEN\" http://169.254.169.254/latest/meta-data/placement/availability-zone)",
+          "REGION=${AZ::-1}",
+          "DATE=$(date -u +\"%Y-%m-%d\")",
+          "TS=$(date -u +\"%Y-%m-%dT%H-%M-%SZ\")",
+          "# --- Files ---",
+          "SCRIPT_NAME='scriptfile.sh'",
+          "REPORT_FILE='inspec-report.json'",
+          "# --- S3 Locations ---",
+          "SCRIPT_BUCKET='chf-binaries'",
+          "SCRIPT_PREFIX='script'",
+          "OUTPUT_BUCKET='ssmpocoutputresults'",
+          "OUTPUT_KEY=\"logs/${DATE}/${INSTANCE_ID}-${TS}.json\"",
+          "echo \"Downloading script from s3://${SCRIPT_BUCKET}/${SCRIPT_PREFIX}/${SCRIPT_NAME}\"",
+          "aws s3 cp s3://${SCRIPT_BUCKET}/${SCRIPT_PREFIX}/${SCRIPT_NAME} ./${SCRIPT_NAME} --region ${REGION}",
+          "chmod +x ./${SCRIPT_NAME}",
+          "echo \"Running InSpec script\"",
+          "bash ./${SCRIPT_NAME}",
+          "if [ ! -f ${REPORT_FILE} ]; then",
+          "  echo \"Expected report file ${REPORT_FILE} not found\"",
+          "  exit 1",
+          "fi",
+          "echo \"Uploading report to s3://${OUTPUT_BUCKET}/${OUTPUT_KEY}\"",
+          "aws s3 cp ${REPORT_FILE} s3://${OUTPUT_BUCKET}/${OUTPUT_KEY} --region ${REGION}",
+          "echo \"InSpec execution and upload completed successfully\""
+        ]
+      }
+    },
+    {
+      "precondition": {
+        "StringEquals": [
+          "platformType",
+          "Windows"
+        ]
+      },
+      "action": "aws:runPowerShellScript",
+      "name": "runInSpecWindows",
+      "inputs": {
+        "runCommand": [
+          "$ScriptBucket = 'chf-binaries'",
+          "$ScriptPrefix = 'script'",
+          "$ScriptName = 'AWS-RunInspecChecks.ps1'",
+          "$LocalScript = Join-Path (Get-Location) $ScriptName",
+          "",
+          "aws s3 cp \"s3://$ScriptBucket/$ScriptPrefix/$ScriptName\" $LocalScript",
+          "powershell -ExecutionPolicy Bypass -File $LocalScript",
+          "exit $LASTEXITCODE"
+        ]
+      }
+    }
+  ]
+}
