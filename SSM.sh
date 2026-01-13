@@ -6,6 +6,24 @@
 
 file chef-workstation.rpm
 
+
+
+# Detect OS version
+PLATFORM=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"')
+PLATFORM_VERSION=$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release | tr -d '"')
+
+echo "Detected platform: $PLATFORM $PLATFORM_VERSION"
+
+# Decide S3 path based on platform
+if [[ "$PLATFORM" == "Amazon Linux" && "$PLATFORM_VERSION" == "2" ]]; then
+  CHEF_S3_PATH="s3://chf-binaries/chef/al2/chef-workstation.rpm"
+elif [[ "$PLATFORM" == "Amazon Linux" && "$PLATFORM_VERSION" == "2023" ]]; then
+  CHEF_S3_PATH="s3://chf-binaries/chef/amazon2023/chef-workstation.rpm"
+else
+  echo "Unsupported platform: $PLATFORM $PLATFORM_VERSION"
+  exit 1
+fi
+
 ----------
 # On public machine Download chef rpm
 
