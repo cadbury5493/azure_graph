@@ -1,3 +1,14 @@
+index=ssc_inspec_event_idx exec_mode=weekly_ssc_dm018
+| spath output=outer_status path=status
+| stats 
+    latest(outer_status) as host_status 
+    by host_name
+| stats
+    count as total_hosts_scanned
+    count(eval(host_status="passed")) as total_hosts_passed
+    count(eval(host_status="failed")) as total_hosts_failed
+
+---
 index=ssc_inspec_event_idx bunit=awscentral_qualys
 | stats 
     count AS total_controls,
