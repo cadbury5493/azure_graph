@@ -118,3 +118,29 @@ index=ssc_inspec_event_idx bunit=awscentral_qualys
     skipped_controls
     compliance_percentage_considering_skipped_as_failed
     is_compliant_95
+
+---
+index=ssc_inspec_event_idx exec_mode=weekly_ssc_dm018
+| spath path=results{} output=results
+| mvexpand results
+| spath input=results
+| stats 
+    dc(host_name) as total_hosts_scanned
+    count(eval(status="passed")) as total_controls_passed
+    count(eval(status="failed")) as total_controls_failed
+
+---
+index=ssc_inspec_event_idx exec_mode=weekly_ssc_dm018
+| spath path=results{} output=results
+| mvexpand results
+| spath input=results
+| stats 
+    dc(host_name) as total_hosts_scanned
+    count(eval(status="passed")) as total_controls_passed
+    count(eval(status="failed")) as total_controls_failed
+    by platfprm
+| rename platfprm as platform
+| sort - total_hosts_scanned
+
+---
+index=ssc_inspec_event_idx exec_mode=weekly_ssc_dm018 | spath output=outer_status path=status | spath path=results{} output=results | mvexpand results | spath input=results | eval reason=if(status=="failed", code_desc, null()) | stats values(reason) as failed_reasons values(platfprm) as platform values(environment) as environment values(outer_status) as outer_status by host_name | eval failed_reasons=if(isnull(failed_reasons), "None", mvjoin(failed_reasons, " || ")) | table host_name platform environment outer_status failed_reasons
