@@ -120,14 +120,16 @@ index=ssc_inspec_event_idx bunit=awscentral_qualys
     is_compliant_95
 
 ---
-index=ssc_inspec_event_idx exec_mode=weekly_ssc_dm018
+index=ssc_inspec_event_idx exec_mode=weekly_ssc_dmn018
+| spath output=outer_status path=status
 | spath path=results{} output=results
 | mvexpand results
 | spath input=results
 | stats 
     dc(host_name) as total_hosts_scanned
-    count(eval(status="passed")) as total_controls_passed
-    count(eval(status="failed")) as total_controls_failed
+    count(eval(outer_status="passed")) as total_controls_passed
+    count(eval(outer_status="failed")) as total_controls_failed
+
 
 ---
 index=ssc_inspec_event_idx exec_mode=weekly_ssc_dm018
