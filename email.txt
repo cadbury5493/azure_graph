@@ -1,3 +1,11 @@
+index=ssc_inspec_event_idx exec_mode=weekly_cis_unix bunit=gis
+| stats
+    count as total_hosts_scanned
+    count(eval(status="passed")) as total_hosts_passed
+    count(eval(status="failed")) as total_hosts_failed
+    by platform
+
+---
 index=ssc_inspec_event_idx exec_mode=weekly_ssc_dm018
 | spath output=outer_status path=status
 | spath output=bunit path=bunit
