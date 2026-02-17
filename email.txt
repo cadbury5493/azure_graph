@@ -1,3 +1,20 @@
+Hi Raj,
+
+I hope you’re doing well.
+
+As you’re aware, we have completed the DM018 scanning across all BestX hosts.
+
+Following up on our earlier discussion regarding the implementation of the CIS scanning solution for BestX, I would like to seek your approval to involve Sudhakar in this activity. The implementation is expected to take approximately one week to complete. Once done, we will be able to scan the BestX hosts against CIS compliance standards and proceed with necessary remediation actions.
+
+Additionally, I wanted to check whether there is a way to specifically identify BestX CIs in the CMDB. If this is currently not feasible, could you please include us in the inventory email that is shared with other teams? This will help us ensure complete coverage and accurate tracking.
+
+Please let me know your thoughts.
+
+Thank you.
+
+
+
+---
 index=ssc_inspec_event_idx exec_mode=weekly_cis_unix bunit=gis
 | stats
     count as total_hosts_scanned
