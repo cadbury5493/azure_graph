@@ -1,3 +1,60 @@
+Hi Vignesh,
+
+During our bi-weekly catch-up, we discussed the need for granular control-level reporting. I’ve documented the details along with an example in the attached document — please have a look.
+
+As discussed, we require sub-control level results because the GCS team provides waivers at a granular level. AWS SSM already generates results in a granular format, which makes it significantly easier to:
+
+Map waivers accurately
+
+Avoid incorrect non-compliance reporting
+
+Maintain audit traceability
+
+Azure Reporting Alignment
+
+We may also need to revisit Azure reporting. Currently, Azure provides non-granular reports. This did not surface earlier because:
+
+Most Azure controls were passing
+
+Instances were compliant
+
+Waivers applied in Azure did not use alphanumeric sub-control mapping
+
+However, if we want to standardize reporting across platforms, granular reporting should be the target format, and Azure reporting may need to be aligned accordingly.
+
+Pending Tasks – AWS SSM POC (Priority Order)
+
+Upload granular report to S3 after CIS profile execution
+
+No additional development required; the report is already generated on the VM and only needs to be uploaded to S3.
+
+Logic to handle multiple control executions dynamically
+
+DM018
+
+CIS Profiles
+
+Rollout across business units
+
+AWSCentral
+
+CRDPM
+
+BestX
+
+Chef licensing compatibility validation
+
+Q1 Goal – DM018 Implementation
+
+As part of our Q1 objectives, we need to implement the DM018 solution on AWSCentral. The Central team is currently waiting for the POC to be completed.
+
+Could you please provide an estimated timeline (ETA) for completion?
+
+Note:
+We have implemented a tactical AWS SSM-based solution for BestX and CRDPM. However, AWSCentral deployment is pending completion of the POC.
+
+Happy to set up a call to discuss further.
+---
 Hi Raj,
 
 I hope you’re doing well.
