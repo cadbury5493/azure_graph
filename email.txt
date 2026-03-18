@@ -1,6 +1,16 @@
 index=ssc_inspec_event_idx exec_mode=weekly_cis_azure status=failed
 | spath path=results{} output=results_mv
 | mvexpand results_mv
+| spath input=results_mv path=id output=id
+| spath input=results_mv path=status output=result_status
+| spath input=results_mv path=message output=message
+| spath input=results_mv path=code_desc output=code_desc
+| search result_status=failed
+| table host_name title cis_id platform environment id result_status message code_desc
+---
+index=ssc_inspec_event_idx exec_mode=weekly_cis_azure status=failed
+| spath path=results{} output=results_mv
+| mvexpand results_mv
 | spath input=results_mv
 | table host_name title cis_id platform environment id status message code_desc
 ---
