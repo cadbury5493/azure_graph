@@ -1,10 +1,10 @@
 index=ssc_inspec_event_idx exec_mode=weekly_cis_azure status=failed
-| mvexpand results
-| spath input=results path=id output=id
-| spath input=results path=status output=result_status
-| spath input=results path=message output=message
-| spath input=results path=code_desc output=code_desc
-| search result_status=failed
+| eval results_json = fromjson(results)
+| mvexpand results_json
+| eval id=results_json.id
+| eval result_status=results_json.status
+| eval message=results_json.message
+| eval code_desc=results_json.code_desc
 | table host_name title cis_id platform environment id result_status message code_desc
 ---
 Hi Vignesh,
