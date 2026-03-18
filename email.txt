@@ -1,3 +1,8 @@
+index=ssc_inspec_event_idx exec_mode=weekly_cis_azure status=failed
+| mvexpand results
+| spath input=results
+| table host_name title cis_id platform environment results.id results.status results.message results.code_desc
+---
 Hi Vignesh,
 
 During our bi-weekly catch-up, we discussed the need for granular control-level reporting. I’ve documented the details along with an example in the attached document — please have a look.
