@@ -73,6 +73,17 @@ def process_json_object(s3, bucket, key):
                     overall_status = "failed"
                     break
 
+          
+
+                filtered_results = []
+                letters = string.ascii_lowercase
+                
+                for idx, r in enumerate(control_results[:26]):  # 🔹 limit to 26 items
+                    suffix = letters[idx]
+                    filtered_results.append({
+                        "id": f"{cis_id}{suffix}"
+                    })
+
             output.append({
                 "host_name": host_name,
                 "title": title,
