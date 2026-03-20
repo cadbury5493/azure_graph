@@ -1,3 +1,14 @@
+Hi Jamie,
+
+Thank you again for your time on the call the other day.
+
+Following our discussion, I’ve carried out a more detailed analysis of the data, including a comparison of the false positives. It appears that there were some issues with the Windows profiles we had previously shared. These have now been updated in alignment with CIS standards. I’ve also validated the Linux profiles, which are largely in good shape.
+
+I’m pleased to share that all Windows instances are now fully compliant. For Linux, there are currently 23 hosts that remain non-compliant, with an average compliance level of approximately 84%. To bring these into compliance, we will need to identify around 26 controls that can either be remediated relatively easily or considered for waiver where appropriate.
+
+I’ve included a fourth tab in the document that captures the associated error messages. Please note that, due to Splunk’s 250-character limit, some messages may be truncated. If any require further clarification, I would be happy to provide the complete details separately.
+
+----
 index=ssc_inspec_event_idx exec_mode=weekly_cis_azure status=failed
 | spath path=results{} output=results_mv
 | mvexpand results_mv
