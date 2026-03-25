@@ -1,3 +1,14 @@
+for waiver_key, ids in waiver_map.items():
+            # split waiver key into parts (e.g. "windows 2022" -> ["windows", "2022"])
+            key_parts = waiver_key.lower().split()
+
+            # check if all parts exist in platform string
+            if all(part in platform for part in key_parts):
+                if check_id in ids:
+                    if item.get("status") != "skipped":
+                        item["status"] = "skipped"
+                        modified = True
+---
 import os
 import json
 import boto3
